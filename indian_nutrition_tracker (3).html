@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AaharAI - Indian Nutrition & Macro Tracker</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            saffron: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              300: '#fcd34d',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+              800: '#92400e',
+              900: '#78350f',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(160, 160, 160, 0.25); border-radius: 9999px; }
+    .badge-pill { font-size: 0.62rem; line-height: 0.8rem; }
+  </style>
+</head>
+<body class="bg-neutral-900 text-neutral-100 min-h-screen font-sans selection:bg-amber-500/20 selection:text-amber-400 transition-colors duration-200 pb-20">
+
+  <header class="sticky top-0 z-30 backdrop-blur-md bg-neutral-900/90 dark:bg-neutral-900/90 border-b border-neutral-800">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
+      <!-- Logo -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('calendar')">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-amber-500/25">
+          <i data-lucide="utensils" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">AaharAI</span>
+          <span class="text-[10px] ml-1.5 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20">India</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links (Desktop) -->
+      <nav class="hidden md:flex items-center space-x-1 bg-neutral-800/80 p-1 rounded-xl text-xs font-semibold">
+        <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn px-3 py-1.5 rounded-lg transition-all text-neutral-400 hover:text-white flex items-center gap-1.5">
+          <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Month Overview
+        </button>
+        <button onclick="switchTab('diary')" id="nav-diary" class="tab-btn px-3 py-1.5 rounded-lg transition-all text-neutral-400 hover:text-white flex items-center gap-1.5">
+          <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Daily Diary (4 Meals)
+        </button>
+        <button onclick="switchTab('foods')" id="nav-foods" class="tab-btn px-3 py-1.5 rounded-lg transition-all text-neutral-400 hover:text-white flex items-center gap-1.5">
+          <i data-lucide="heart" class="w-3.5 h-3.5 text-rose-400"></i> Indian Foods
+        </button>
+        <button onclick="switchTab('review')" id="nav-review" class="tab-btn px-3 py-1.5 rounded-lg transition-all text-neutral-400 hover:text-white flex items-center gap-1.5">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i> AI Diagnosis
+        </button>
+      </nav>
+
+      <!-- Action items: Google Auth User Pill, Gemini Key, Theme Toggle -->
+      <div class="flex items-center space-x-2 shrink-0">
+        <!-- Firebase Google Auth User Pill -->
+        <div id="firebaseAuthContainer" class="flex items-center">
+          <button onclick="handleAuthAction()" id="authMainBtn" class="px-3 py-1.5 rounded-xl border border-neutral-700 bg-neutral-800/90 hover:bg-neutral-700 text-xs font-medium flex items-center gap-2 transition">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" id="syncDot"></span>
+            <span id="authStatusText">Sign In with Google</span>
+          </button>
+        </div>
+
+        <!-- Gemini API Key Button -->
+        <button onclick="openApiKeyModal()" id="apiKeyBadgeBtn" class="px-2.5 py-1.5 rounded-xl border border-neutral-700 bg-neutral-800/80 hover:bg-neutral-700 text-xs font-medium text-amber-400 flex items-center gap-1.5 transition" title="Gemini AI Configuration">
+          <i data-lucide="key" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline" id="apiKeyStatusLabel">Gemini AI</span>
+        </button>
+
+        <!-- Light/Dark Mode Switcher -->
+        <button onclick="toggleTheme()" class="p-2 rounded-xl border border-neutral-700 hover:bg-neutral-800 transition text-neutral-300" title="Toggle Theme">
+          <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
+          <i data-lucide="moon" class="w-4 h-4 block dark:hidden text-neutral-600"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Tab Bar -->
+    <div class="flex md:hidden border-t border-neutral-800 bg-neutral-900 px-2 py-1.5 justify-around text-[11px] font-semibold">
+      <button onclick="switchTab('calendar')" id="mob-calendar" class="py-1 px-2 rounded-lg flex flex-col items-center text-neutral-400">
+        <i data-lucide="calendar" class="w-4 h-4 mb-0.5"></i> Month
+      </button>
+      <button onclick="switchTab('diary')" id="mob-diary" class="py-1 px-2 rounded-lg flex flex-col items-center text-neutral-400">
+        <i data-lucide="book-open" class="w-4 h-4 mb-0.5"></i> Diary
+      </button>
+      <button onclick="switchTab('foods')" id="mob-foods" class="py-1 px-2 rounded-lg flex flex-col items-center text-neutral-400">
+        <i data-lucide="heart" class="w-4 h-4 mb-0.5"></i> Foods
+      </button>
+      <button onclick="switchTab('review')" id="mob-review" class="py-1 px-2 rounded-lg flex flex-col items-center text-neutral-400">
+        <i data-lucide="sparkles" class="w-4 h-4 mb-0.5 text-amber-400"></i> AI Check
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 pt-6 space-y-6">
+
+    <!-- 1. MONTH OVERVIEW VIEW -->
+    <section id="tab-calendar" class="tab-pane space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-800/60 p-5 rounded-2xl border border-neutral-800 shadow-sm backdrop-blur">
+        <div>
+          <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+            <i data-lucide="calendar-days" class="w-5 h-5 text-amber-500"></i>
+            Monthly Nutrition & Weight Overview
+          </h1>
+          <p class="text-xs text-neutral-400 mt-0.5">Under each date, view your daily Calories (kcal), Protein (g), and logged Body Weight (kg).</p>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <button onclick="changeMonth(-1)" class="p-2 rounded-xl border border-neutral-700 hover:bg-neutral-700 text-neutral-300 transition">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+          <span id="calendarMonthLabel" class="text-sm font-bold w-36 text-center text-neutral-200"></span>
+          <button onclick="changeMonth(1)" class="p-2 rounded-xl border border-neutral-700 hover:bg-neutral-700 text-neutral-300 transition">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+          <button onclick="goToToday()" class="text-xs px-3 py-2 bg-neutral-700 hover:bg-neutral-600 rounded-xl font-semibold transition text-white">Today</button>
+        </div>
+      </div>
+
+      <!-- Month Grid -->
+      <div class="bg-neutral-800/50 rounded-2xl border border-neutral-800 shadow-sm overflow-hidden p-3 sm:p-5">
+        <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
+          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+        <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 sm:gap-2"></div>
+      </div>
+
+      <!-- Monthly Summary Metrics -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-neutral-800/60 p-4 rounded-2xl border border-neutral-800">
+          <span class="text-xs font-medium text-neutral-400">Days Logged This Month</span>
+          <p id="statLoggedDays" class="text-2xl font-bold mt-1 text-white">0</p>
+        </div>
+        <div class="bg-neutral-800/60 p-4 rounded-2xl border border-neutral-800">
+          <span class="text-xs font-medium text-neutral-400">Average Daily Calories</span>
+          <p id="statAvgCalories" class="text-2xl font-bold mt-1 text-amber-400">0 <span class="text-xs font-normal text-neutral-400">kcal</span></p>
+        </div>
+        <div class="bg-neutral-800/60 p-4 rounded-2xl border border-neutral-800">
+          <span class="text-xs font-medium text-neutral-400">Average Daily Protein</span>
+          <p id="statAvgProtein" class="text-2xl font-bold mt-1 text-emerald-400">0 <span class="text-xs font-normal text-neutral-400">g</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. DAILY DIARY VIEW (4 SECTIONS + WEIGHT) -->
+    <section id="tab-diary" class="tab-pane hidden space-y-6">
+      
+      <!-- Date Navigator & Weight Tracker Bar -->
+      <div class="bg-neutral-800/60 p-5 rounded-2xl border border-neutral-800 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <div class="flex items-center space-x-3">
+          <button onclick="navigateDay(-1)" class="p-2 rounded-xl border border-neutral-700 hover:bg-neutral-700 transition">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+          <div>
+            <input type="date" id="diaryDatePicker" onchange="onDateInputChange(this.value)" class="text-base font-bold bg-transparent border-0 focus:ring-0 text-white cursor-pointer" />
+            <p id="diaryDateHuman" class="text-xs text-neutral-400 font-medium"></p>
+          </div>
+          <button onclick="navigateDay(1)" class="p-2 rounded-xl border border-neutral-700 hover:bg-neutral-700 transition">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Body Weight input for specific date -->
+        <div class="flex items-center gap-3 bg-neutral-900/80 px-4 py-2 rounded-xl border border-neutral-700/60">
+          <div class="flex items-center gap-1.5 text-neutral-300 text-xs font-semibold">
+            <i data-lucide="scale" class="w-4 h-4 text-amber-500"></i> Weight for this day:
+          </div>
+          <div class="flex items-center gap-1.5">
+            <input type="number" step="0.1" id="dailyWeightInput" placeholder="--.-" class="w-16 text-center text-sm font-bold bg-neutral-800 border border-neutral-700 rounded-lg py-1 px-1 text-white focus:outline-none focus:border-amber-500" />
+            <span class="text-xs font-medium text-neutral-400">kg</span>
+            <button onclick="saveDailyWeight()" class="text-xs px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-lg transition">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Macro Summary Cards with Visual Indicators -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-neutral-800/60 p-4 rounded-2xl border border-neutral-800">
+          <div class="flex items-center justify-between text-neutral-400 text-xs">
+            <span>Total Calories</span>
+            <i data-lucide="flame" class="w-4 h-4 text-amber-400"></i>
+          </div>
+          <div class="mt-2 flex items-baseline gap-1">
+            <span id="dayCalorieTotal" class="text-2xl font-bold text-white">0</span>
+            <span class="text-xs text-neutral-400">kcal</span>
+          </div>
+        </div>
+
+        <div class="bg-neutral-800/60 p-4 rounded-2xl border border-neutral-800">
+          <div class="flex items-center justify-between text-neutral-400 text-xs">
+            <span>Protein</span>
+            <i data-lucide="dumbbell" class="w-4 h-4 text-emerald-400"></i>
+          </div>
+          <div class="mt-2 flex items-baseline gap-1">
+            <span id="dayProteinTotal" class="text-2xl font-bold text-emerald-400">0</span>
+            <span class="text-xs text-neutral-400">g</span>
+          </div>
+        </div>
+
+        <div class="bg-neutral-800/60 p-4 rounded-2xl border border-neutral-800">
+          <div class="flex items-center justify-between text-neutral-400 text-xs">
+            <span>Carbohydrates</span>
+            <i data-lucide="wheat" class="w-4 h-4 text-amber-300"></i>
+          </div>
+          <div class="mt-2 flex items-baseline gap-1">
+            <span id="dayCarbTotal" class="text-2xl font-bold text-white">0</span>
+            <span class="text-xs text-neutral-400">g</span>
+          </div>
+        </div>
+
+        <div class="bg-neutral-800/60 p-4 rounded-2xl border border-neutral-800">
+          <div class="flex items-center justify-between text-neutral-400 text-xs">
+            <span>Fats</span>
+            <i data-lucide="droplet" class="w-4 h-4 text-rose-400"></i>
+          </div>
+          <div class="mt-2 flex items-baseline gap-1">
+            <span id="dayFatTotal" class="text-2xl font-bold text-white">0</span>
+            <span class="text-xs text-neutral-400">g</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 Meal Blocks: Breakfast, Lunch, Snacks, Dinner -->
+      <div class="space-y-4">
+        <!-- Breakfast -->
+        <div class="meal-block bg-neutral-800/60 rounded-2xl border border-neutral-800 p-4 sm:p-5" data-meal="Breakfast">
+          <div class="flex items-center justify-between pb-3 border-b border-neutral-700/60">
+            <div class="flex items-center space-x-2.5">
+              <span class="p-2 rounded-xl bg-amber-500/10 text-amber-400">
+                <i data-lucide="coffee" class="w-4 h-4"></i>
+              </span>
+              <div>
+                <h2 class="text-base font-bold text-white">Breakfast</h2>
+                <span class="text-xs text-neutral-400 meal-macro-sum" id="sum-Breakfast">0 kcal • 0g P</span>
+              </div>
+            </div>
+            <button onclick="openAddFoodModal('Breakfast')" class="text-xs px-3 py-1.5 rounded-xl bg-neutral-700/80 hover:bg-neutral-700 font-semibold text-neutral-200 transition flex items-center gap-1.5">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Food
+            </button>
+          </div>
+          <div class="divide-y divide-neutral-700/40 mt-2 meal-food-list" id="list-Breakfast"></div>
+        </div>
+
+        <!-- Lunch -->
+        <div class="meal-block bg-neutral-800/60 rounded-2xl border border-neutral-800 p-4 sm:p-5" data-meal="Lunch">
+          <div class="flex items-center justify-between pb-3 border-b border-neutral-700/60">
+            <div class="flex items-center space-x-2.5">
+              <span class="p-2 rounded-xl bg-orange-500/10 text-orange-400">
+                <i data-lucide="sun" class="w-4 h-4"></i>
+              </span>
+              <div>
+                <h2 class="text-base font-bold text-white">Lunch</h2>
+                <span class="text-xs text-neutral-400 meal-macro-sum" id="sum-Lunch">0 kcal • 0g P</span>
+              </div>
+            </div>
+            <button onclick="openAddFoodModal('Lunch')" class="text-xs px-3 py-1.5 rounded-xl bg-neutral-700/80 hover:bg-neutral-700 font-semibold text-neutral-200 transition flex items-center gap-1.5">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Food
+            </button>
+          </div>
+          <div class="divide-y divide-neutral-700/40 mt-2 meal-food-list" id="list-Lunch"></div>
+        </div>
+
+        <!-- Snacks & Chai -->
+        <div class="meal-block bg-neutral-800/60 rounded-2xl border border-neutral-800 p-4 sm:p-5" data-meal="Snacks">
+          <div class="flex items-center justify-between pb-3 border-b border-neutral-700/60">
+            <div class="flex items-center space-x-2.5">
+              <span class="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+                <i data-lucide="cookie" class="w-4 h-4"></i>
+              </span>
+              <div>
+                <h2 class="text-base font-bold text-white">Snacks & Chai</h2>
+                <span class="text-xs text-neutral-400 meal-macro-sum" id="sum-Snacks">0 kcal • 0g P</span>
+              </div>
+            </div>
+            <button onclick="openAddFoodModal('Snacks')" class="text-xs px-3 py-1.5 rounded-xl bg-neutral-700/80 hover:bg-neutral-700 font-semibold text-neutral-200 transition flex items-center gap-1.5">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Food
+            </button>
+          </div>
+          <div class="divide-y divide-neutral-700/40 mt-2 meal-food-list" id="list-Snacks"></div>
+        </div>
+
+        <!-- Dinner -->
+        <div class="meal-block bg-neutral-800/60 rounded-2xl border border-neutral-800 p-4 sm:p-5" data-meal="Dinner">
+          <div class="flex items-center justify-between pb-3 border-b border-neutral-700/60">
+            <div class="flex items-center space-x-2.5">
+              <span class="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
+                <i data-lucide="moon" class="w-4 h-4"></i>
+              </span>
+              <div>
+                <h2 class="text-base font-bold text-white">Dinner</h2>
+                <span class="text-xs text-neutral-400 meal-macro-sum" id="sum-Dinner">0 kcal • 0g P</span>
+              </div>
+            </div>
+            <button onclick="openAddFoodModal('Dinner')" class="text-xs px-3 py-1.5 rounded-xl bg-neutral-700/80 hover:bg-neutral-700 font-semibold text-neutral-200 transition flex items-center gap-1.5">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Food
+            </button>
+          </div>
+          <div class="divide-y divide-neutral-700/40 mt-2 meal-food-list" id="list-Dinner"></div>
+        </div>
+      </div>
+
+      <!-- Quick AI Evaluation Prompt banner -->
+      <div class="p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-transparent border border-amber-500/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <h3 class="font-bold text-white flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i> Evaluate Today's Indian Diet
+          </h3>
+          <p class="text-xs text-neutral-400 mt-0.5">Let Gemini diagnose what was right, what was wrong (carb spikes, low protein), and actionable Indian swaps.</p>
+        </div>
+        <button onclick="generateDailyReview()" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-black font-bold rounded-xl text-xs transition flex items-center gap-2 shadow-sm whitespace-nowrap">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Run AI Diagnosis
+        </button>
+      </div>
+    </section>
+
+    <!-- 3. INDIAN FOOD LIBRARY & CUSTOM FOODS -->
+    <section id="tab-foods" class="tab-pane hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-800/60 p-5 rounded-2xl border border-neutral-800">
+        <div>
+          <h1 class="text-xl font-bold text-white flex items-center gap-2">
+            <i data-lucide="utensils-crossed" class="w-5 h-5 text-amber-500"></i> Indian Food Library & Custom Dishes
+          </h1>
+          <p class="text-xs text-neutral-400 mt-0.5">45+ Indian staples (rotis, dals, paneer, poha, rice, sattu) & custom foods synced to your account.</p>
+        </div>
+        <button onclick="openCustomFoodModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-xl text-xs transition flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Custom Food
+        </button>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="bg-neutral-800/60 p-4 rounded-2xl border border-neutral-800 flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5"></i>
+          <input type="text" id="foodSearchInput" oninput="renderFoodLibrary()" placeholder="Search roti, dal tadka, paneer, khichdi, idli, sattu, chicken..." class="w-full pl-10 pr-4 py-2 bg-neutral-900 border border-neutral-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500" />
+        </div>
+        <button id="filterFavBtn" onclick="toggleFavFilter()" class="px-3.5 py-2 rounded-xl text-xs font-semibold border border-neutral-700 bg-neutral-800 text-neutral-300 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="star" class="w-3.5 h-3.5 text-amber-400"></i> Only Favorites
+        </button>
+      </div>
+
+      <!-- Food Grid -->
+      <div id="foodLibraryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- 4. AI NUTRITIONIST DIAGNOSIS VIEW -->
+    <section id="tab-review" class="tab-pane hidden space-y-6">
+      <div class="bg-neutral-800/60 p-5 rounded-2xl border border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-xl font-bold text-white flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-5 h-5 text-amber-500"></i> AI Nutritionist Diagnosis
+          </h1>
+          <p class="text-xs text-neutral-400 mt-0.5">What went right, what was wrong (carb spikes, low protein, oils), and realistic Indian swaps.</p>
+        </div>
+        <button onclick="generateDailyReview()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-xl text-xs transition flex items-center gap-2">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i> Re-Analyze Today
+        </button>
+      </div>
+
+      <!-- Results Container -->
+      <div id="reviewContainer">
+        <!-- Empty State -->
+        <div id="reviewEmptyState" class="bg-neutral-800/50 p-12 rounded-2xl border border-neutral-800 text-center">
+          <div class="w-12 h-12 mx-auto rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 mb-3">
+            <i data-lucide="bot" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-base font-bold text-neutral-200">No AI review generated yet for this date</h3>
+          <p class="text-xs text-neutral-400 max-w-md mx-auto mt-1">Log foods in your Daily Diary first, then click "Run AI Diagnosis" to discover what went well and what needs improvement.</p>
+          <button onclick="generateDailyReview()" class="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-xl transition">Analyze Today's Meals</button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="reviewLoadingState" class="hidden bg-neutral-800/50 p-12 rounded-2xl border border-neutral-800 text-center space-y-4">
+          <div class="inline-block animate-spin text-amber-500">
+            <i data-lucide="loader-2" class="w-8 h-8"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Analyzing Your Indian Meals...</h3>
+            <p class="text-xs text-neutral-400 max-w-sm mx-auto mt-1">Checking glycemic balance, protein-to-carb ratios, and portion sizes with Gemini.</p>
+          </div>
+        </div>
+
+        <!-- Rendered Analysis Content -->
+        <div id="reviewContentArea" class="hidden space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- What Went Well -->
+            <div class="bg-neutral-800/60 p-5 rounded-2xl border border-emerald-500/20">
+              <div class="flex items-center gap-2 text-emerald-400 font-bold mb-3 text-sm">
+                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                <h3>What Went Well</h3>
+              </div>
+              <ul id="reviewGoodList" class="space-y-2 text-xs text-neutral-300"></ul>
+            </div>
+
+            <!-- What Was Wrong / Need Improvement -->
+            <div class="bg-neutral-800/60 p-5 rounded-2xl border border-rose-500/20">
+              <div class="flex items-center gap-2 text-rose-400 font-bold mb-3 text-sm">
+                <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                <h3>What Was Wrong / Areas to Fix</h3>
+              </div>
+              <ul id="reviewBadList" class="space-y-2 text-xs text-neutral-300"></ul>
+            </div>
+          </div>
+
+          <!-- Actionable Indian Recommendations -->
+          <div class="bg-neutral-800/60 p-5 rounded-2xl border border-amber-500/20">
+            <div class="flex items-center gap-2 text-amber-400 font-bold mb-3 text-sm">
+              <i data-lucide="lightbulb" class="w-4 h-4"></i>
+              <h3>Actionable Indian Recommendations & Swaps</h3>
+            </div>
+            <div id="reviewRecommendations" class="space-y-2 text-xs text-neutral-300"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: ADD FOOD TO MEAL -->
+  <div id="addFoodModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-neutral-900 rounded-2xl border border-neutral-700 shadow-2xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
+        <div>
+          <h3 class="font-bold text-base text-white" id="modalMealTitle">Add Food to Meal</h3>
+          <p class="text-xs text-neutral-400">Understands Indian terms (katori, roti, poha, paneer, chawal, sattu).</p>
+        </div>
+        <button onclick="closeAddFoodModal()" class="text-neutral-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Dish Name / Natural Description</label>
+          <input type="text" id="foodInputDescription" placeholder="e.g. 2 whole wheat rotis with ghee, 1 katori dal tadka, 150g paneer bhurji" class="w-full px-3.5 py-2.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Portion / Custom Weight</label>
+            <input type="text" id="foodInputWeight" placeholder="e.g. 150g, 2 pieces, 1 katori" class="w-full px-3.5 py-2.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Target Meal</label>
+            <select id="modalMealSelect" class="w-full px-3.5 py-2.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500">
+              <option value="Breakfast">Breakfast</option>
+              <option value="Lunch">Lunch</option>
+              <option value="Snacks">Snacks</option>
+              <option value="Dinner">Dinner</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="button" onclick="analyzeFoodSmart()" id="btnAnalyzeFood" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-sm transition">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Calculate Nutrition (Gemini AI & Fallback)
+        </button>
+
+        <div class="pt-2 border-t border-neutral-800">
+          <span class="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-2">Nutritional Values (Calculated or Manual)</span>
+          <div class="grid grid-cols-4 gap-2">
+            <div>
+              <label class="text-[10px] text-neutral-400">Calories</label>
+              <input type="number" id="inputCalories" value="0" class="w-full text-center py-1.5 bg-neutral-800 border border-neutral-700 rounded-lg text-xs font-bold text-white" />
+            </div>
+            <div>
+              <label class="text-[10px] text-neutral-400">Protein (g)</label>
+              <input type="number" step="0.1" id="inputProtein" value="0" class="w-full text-center py-1.5 bg-neutral-800 border border-neutral-700 rounded-lg text-xs font-bold text-emerald-400" />
+            </div>
+            <div>
+              <label class="text-[10px] text-neutral-400">Carbs (g)</label>
+              <input type="number" step="0.1" id="inputCarbs" value="0" class="w-full text-center py-1.5 bg-neutral-800 border border-neutral-700 rounded-lg text-xs font-bold text-white" />
+            </div>
+            <div>
+              <label class="text-[10px] text-neutral-400">Fats (g)</label>
+              <input type="number" step="0.1" id="inputFats" value="0" class="w-full text-center py-1.5 bg-neutral-800 border border-neutral-700 rounded-lg text-xs font-bold text-white" />
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-3">
+          <button type="button" onclick="closeAddFoodModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white transition">Cancel</button>
+          <button type="button" onclick="confirmAddFoodItem()" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs transition">Add to Meal</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CUSTOM FOOD CREATOR -->
+  <div id="customFoodModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-neutral-900 rounded-2xl border border-neutral-700 shadow-2xl max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
+        <h3 class="font-bold text-base text-white">Create Custom Indian Food</h3>
+        <button onclick="closeCustomFoodModal()" class="text-neutral-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-neutral-400 mb-1">Food / Dish Name</label>
+          <input type="text" id="customFoodName" placeholder="e.g. Sattu Paratha with Pickle" class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] text-neutral-400 mb-1">Default Portion / Weight</label>
+            <input type="text" id="customFoodPortion" placeholder="e.g. 1 paratha (80g)" class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white" />
+          </div>
+          <div>
+            <label class="block text-[10px] text-neutral-400 mb-1">Calories (kcal)</label>
+            <input type="number" id="customFoodCal" placeholder="220" class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white" />
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block text-[10px] text-neutral-400 mb-1">Protein (g)</label>
+            <input type="number" step="0.1" id="customFoodPro" placeholder="9" class="w-full px-3 py-1.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white" />
+          </div>
+          <div>
+            <label class="block text-[10px] text-neutral-400 mb-1">Carbs (g)</label>
+            <input type="number" step="0.1" id="customFoodCarb" placeholder="32" class="w-full px-3 py-1.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white" />
+          </div>
+          <div>
+            <label class="block text-[10px] text-neutral-400 mb-1">Fats (g)</label>
+            <input type="number" step="0.1" id="customFoodFat" placeholder="6" class="w-full px-3 py-1.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white" />
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeCustomFoodModal()" class="px-3 py-2 text-xs font-semibold text-neutral-400 hover:text-white">Cancel</button>
+        <button onclick="saveCustomFoodItem()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-xl">Save Dish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GEMINI API KEY -->
+  <div id="apiKeyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-neutral-900 rounded-2xl border border-neutral-700 shadow-2xl max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-5 h-5 text-amber-500"></i>
+          <h3 class="font-bold text-base text-white">Gemini API Key</h3>
+        </div>
+        <button onclick="closeApiKeyModal()" class="text-neutral-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <p class="text-xs text-neutral-400">Stored permanently in your browser. The app also includes a 45+ item offline Indian food database if you choose not to add one.</p>
+      <div>
+        <label class="block text-[11px] font-bold text-neutral-400 mb-1">Gemini API Key</label>
+        <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500" />
+      </div>
+      <div class="flex justify-between items-center pt-2">
+        <button onclick="clearApiKey()" class="text-xs text-rose-400 hover:underline">Remove Key</button>
+        <div class="flex gap-2">
+          <button onclick="closeApiKeyModal()" class="px-3 py-1.5 text-xs text-neutral-400 hover:text-white">Cancel</button>
+          <button onclick="saveApiKey()" class="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-xl">Save Key</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+      getAuth, 
+      GoogleAuthProvider, 
+      signInWithPopup, 
+      signOut, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      setDoc, 
+      collection, 
+      onSnapshot 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Embedded User Firebase Project Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1FJDUdT1KTfOaS_Lx4qm7FbatDysunio",
+      authDomain: "nutrition-tracker-862e0.firebaseapp.com",
+      projectId: "nutrition-tracker-862e0",
+      storageBucket: "nutrition-tracker-862e0.firebasestorage.app",
+      messagingSenderId: "924840001129",
+      appId: "1:924840001129:web:fd38d3920f771859d92cf8",
+      measurementId: "G-8MN4MC03CY"
+    };
+
+    window.APP_STATE = {
+      user: null,
+      auth: null,
+      db: null
+    };
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      window.APP_STATE.auth = getAuth(app);
+      window.APP_STATE.db = getFirestore(app);
+
+      onAuthStateChanged(window.APP_STATE.auth, (user) => {
+        window.APP_STATE.user = user;
+        updateUserAuthUI(user);
+        if (user) {
+          startCloudSync(user.uid);
+        }
+      });
+    } catch (e) {
+      console.warn("Firebase Init Notice:", e);
+    }
+
+    function updateUserAuthUI(user) {
+      const authBtn = document.getElementById('authMainBtn');
+      const authText = document.getElementById('authStatusText');
+      const dot = document.getElementById('syncDot');
+
+      if (user) {
+        authText.innerHTML = `
+          <div class="flex items-center gap-1.5">
+            <img src="${user.photoURL || 'https://placehold.co/24x24/f59e0b/ffffff?text=U'}" class="w-4 h-4 rounded-full" />
+            <span class="max-w-[110px] truncate">${user.displayName ? user.displayName.split(' ')[0] : 'Synced'}</span>
+          </div>
+        `;
+        authBtn.title = `Signed in as ${user.email} (Click to sign out)`;
+        dot.className = "w-2 h-2 rounded-full bg-emerald-400";
+      } else {
+        authText.textContent = "Sign In with Google";
+        authBtn.title = "Sign In with Google to auto-sync";
+        dot.className = "w-2 h-2 rounded-full bg-neutral-500";
+      }
+    }
+
+    window.handleAuthAction = async function() {
+      if (window.APP_STATE.user) {
+        // Confirm sign out gracefully without window.confirm
+        await signOut(window.APP_STATE.auth);
+        showCustomAlert("Signed out. Using local browser storage.");
+      } else {
+        const provider = new GoogleAuthProvider();
+        try {
+          const res = await signInWithPopup(window.APP_STATE.auth, provider);
+          showCustomAlert(`Signed in as ${res.user.displayName}! Cloud Auto-Sync is live.`);
+        } catch (err) {
+          console.error("Auth error:", err);
+          showCustomAlert("Google Sign-In: " + err.message);
+        }
+      }
+    };
+
+    // Firestore Bidirectional Realtime Sync
+    function startCloudSync(uid) {
+      if (!window.APP_STATE.db) return;
+      const appId = "nutrition-tracker-862e0";
+
+      // 1. Daily Meal Logs Sync
+      const logsCol = collection(window.APP_STATE.db, 'artifacts', appId, 'users', uid, 'dailyLogs');
+      onSnapshot(logsCol, (snap) => {
+        snap.forEach(docSnap => {
+          if (docSnap.exists()) {
+            window.allDayRecords[docSnap.id] = docSnap.data();
+          }
+        });
+        localStorage.setItem('nutritrack_days', JSON.stringify(window.allDayRecords));
+        renderCurrentDayDiary();
+        renderCalendar();
+      }, err => console.debug("Sync log stream:", err));
+
+      // 2. Weights Sync
+      const weightsCol = collection(window.APP_STATE.db, 'artifacts', appId, 'users', uid, 'weights');
+      onSnapshot(weightsCol, (snap) => {
+        snap.forEach(docSnap => {
+          if (docSnap.exists()) {
+            window.bodyWeights[docSnap.id] = docSnap.data().weight;
+          }
+        });
+        localStorage.setItem('nutritrack_weights', JSON.stringify(window.bodyWeights));
+        updateWeightInputForDate();
+        renderCalendar();
+      }, err => console.debug("Sync weight stream:", err));
+
+      // 3. Custom Foods Sync
+      const foodsCol = collection(window.APP_STATE.db, 'artifacts', appId, 'users', uid, 'customFoods');
+      onSnapshot(foodsCol, (snap) => {
+        snap.forEach(docSnap => {
+          if (docSnap.exists()) {
+            const food = docSnap.data();
+            const idx = window.indianFoodDatabase.findIndex(f => f.id === food.id);
+            if (idx >= 0) {
+              window.indianFoodDatabase[idx] = food;
+            } else {
+              window.indianFoodDatabase.unshift(food);
+            }
+          }
+        });
+        localStorage.setItem('nutritrack_custom_foods', JSON.stringify(window.indianFoodDatabase));
+        renderFoodLibrary();
+      }, err => console.debug("Sync foods stream:", err));
+    }
+
+    // Cloud push methods
+    window.cloudSaveDay = async function(dateStr, data) {
+      if (!window.APP_STATE.user || !window.APP_STATE.db) return;
+      try {
+        const appId = "nutrition-tracker-862e0";
+        await setDoc(doc(window.APP_STATE.db, 'artifacts', appId, 'users', window.APP_STATE.user.uid, 'dailyLogs', dateStr), data);
+      } catch (e) {
+        console.error("Cloud Day Save Error:", e);
+      }
+    };
+
+    window.cloudSaveWeight = async function(dateStr, weight) {
+      if (!window.APP_STATE.user || !window.APP_STATE.db) return;
+      try {
+        const appId = "nutrition-tracker-862e0";
+        await setDoc(doc(window.APP_STATE.db, 'artifacts', appId, 'users', window.APP_STATE.user.uid, 'weights', dateStr), {
+          date: dateStr,
+          weight: weight,
+          updatedAt: Date.now()
+        });
+      } catch (e) {
+        console.error("Cloud Weight Save Error:", e);
+      }
+    };
+
+    window.cloudSaveFood = async function(foodObj) {
+      if (!window.APP_STATE.user || !window.APP_STATE.db) return;
+      try {
+        const appId = "nutrition-tracker-862e0";
+        await setDoc(doc(window.APP_STATE.db, 'artifacts', appId, 'users', window.APP_STATE.user.uid, 'customFoods', foodObj.id), foodObj);
+      } catch (e) {
+        console.error("Cloud Food Save Error:", e);
+      }
+    };
+  </script>
+
+  <script>
+    const DEFAULT_INDIAN_FOODS = [
+      { id: "f-1", name: "Roti (Plain Whole Wheat Phulka)", portion: "1 piece (35g)", calories: 85, protein: 3.0, carbs: 17.5, fats: 0.5, favorite: true },
+      { id: "f-2", name: "Roti with Desi Ghee", portion: "1 piece (40g)", calories: 120, protein: 3.0, carbs: 17.5, fats: 4.5, favorite: true },
+      { id: "f-3", name: "Yellow Dal Tadka (Arhar/Toor)", portion: "1 katori (150g)", calories: 145, protein: 7.5, carbs: 20.0, fats: 4.0, favorite: true },
+      { id: "f-4", name: "Moong Dal (Simple Boiled)", portion: "1 katori (150g)", calories: 120, protein: 8.5, carbs: 18.0, fats: 1.5, favorite: false },
+      { id: "f-5", name: "Basmati Steamed Rice", portion: "1 katori (150g cooked)", calories: 195, protein: 4.0, carbs: 43.0, fats: 0.5, favorite: true },
+      { id: "f-6", name: "Brown Rice", portion: "1 katori (150g cooked)", calories: 165, protein: 3.5, carbs: 35.0, fats: 1.2, favorite: false },
+      { id: "f-7", name: "Paneer Bhurji", portion: "1 cup (150g)", calories: 285, protein: 16.5, carbs: 6.0, fats: 22.0, favorite: true },
+      { id: "f-8", name: "Raw Paneer Cubes", portion: "100g", calories: 295, protein: 18.0, carbs: 3.5, fats: 23.0, favorite: false },
+      { id: "f-9", name: "Curd / Dahi (Plain Homemade)", portion: "1 katori (150g)", calories: 95, protein: 5.5, carbs: 6.8, fats: 4.5, favorite: true },
+      { id: "f-10", name: "Poha with Peanuts", portion: "1 plate (150g)", calories: 260, protein: 5.5, carbs: 45.0, fats: 7.5, favorite: true },
+      { id: "f-11", name: "Upma (Semolina / Suji)", portion: "1 bowl (150g)", calories: 220, protein: 4.5, carbs: 36.0, fats: 6.5, favorite: false },
+      { id: "f-12", name: "Steamed Idli", portion: "2 pieces (100g)", calories: 130, protein: 4.0, carbs: 28.0, fats: 0.4, favorite: true },
+      { id: "f-13", name: "Vegetable Sambar", portion: "1 bowl (180g)", calories: 110, protein: 4.5, carbs: 18.0, fats: 2.5, favorite: true },
+      { id: "f-14", name: "Plain Dosa", portion: "1 medium", calories: 170, protein: 3.8, carbs: 30.0, fats: 4.0, favorite: false },
+      { id: "f-15", name: "Masala Dosa with Aloo", portion: "1 dosa", calories: 330, protein: 6.0, carbs: 52.0, fats: 11.0, favorite: false },
+      { id: "f-16", name: "Chole / Chana Masala", portion: "1 katori (150g)", calories: 210, protein: 9.0, carbs: 30.0, fats: 6.0, favorite: true },
+      { id: "f-17", name: "Rajma Masala (Kidney Beans)", portion: "1 katori (160g)", calories: 195, protein: 8.5, carbs: 29.0, fats: 5.0, favorite: true },
+      { id: "f-18", name: "Khichdi (Moong Dal & Rice)", portion: "1 bowl (200g)", calories: 235, protein: 7.5, carbs: 41.0, fats: 4.5, favorite: true },
+      { id: "f-19", name: "Boiled Whole Egg", portion: "1 egg (50g)", calories: 72, protein: 6.3, carbs: 0.4, fats: 4.8, favorite: true },
+      { id: "f-20", name: "Egg Whites Only (Boiled)", portion: "2 whites", calories: 34, protein: 7.2, carbs: 0.4, fats: 0.1, favorite: false },
+      { id: "f-21", name: "Egg Bhurji (2 eggs + onion)", portion: "1 plate", calories: 210, protein: 13.5, carbs: 4.0, fats: 15.0, favorite: false },
+      { id: "f-22", name: "Chicken Curry (Home-style)", portion: "1 bowl (180g, 3 pcs)", calories: 275, protein: 26.0, carbs: 6.0, fats: 16.0, favorite: true },
+      { id: "f-23", name: "Tandoori Chicken Breast", portion: "1 piece (150g)", calories: 220, protein: 36.0, carbs: 2.0, fats: 7.0, favorite: false },
+      { id: "f-24", name: "Sattu Paratha", portion: "1 paratha", calories: 240, protein: 9.0, carbs: 35.0, fats: 7.5, favorite: true },
+      { id: "f-25", name: "Aloo Paratha with Butter", portion: "1 paratha", calories: 310, protein: 5.0, carbs: 45.0, fats: 12.5, favorite: false },
+      { id: "f-26", name: "Besan Chilla", portion: "2 chillas", calories: 210, protein: 10.0, carbs: 26.0, fats: 7.0, favorite: true },
+      { id: "f-27", name: "Indian Masala Chai with Sugar", portion: "1 cup (120ml)", calories: 85, protein: 2.5, carbs: 12.0, fats: 3.0, favorite: true },
+      { id: "f-28", name: "Indian Chai (No Sugar)", portion: "1 cup (120ml)", calories: 45, protein: 2.5, carbs: 3.5, fats: 2.5, favorite: false },
+      { id: "f-29", name: "Chaas / Buttermilk (Salted)", portion: "1 glass (200ml)", calories: 45, protein: 2.8, carbs: 4.2, fats: 1.8, favorite: true },
+      { id: "f-30", name: "Sweet Lassi", portion: "1 glass (250ml)", calories: 230, protein: 6.0, carbs: 38.0, fats: 6.5, favorite: false },
+      { id: "f-31", name: "Roasted Chana (Chickpeas)", portion: "1 handful (40g)", calories: 145, protein: 7.5, carbs: 23.0, fats: 2.5, favorite: true },
+      { id: "f-32", name: "Roasted Peanuts (Mungfali)", portion: "30g", calories: 175, protein: 7.8, carbs: 5.0, fats: 14.5, favorite: false },
+      { id: "f-33", name: "Soya Chunks Curry", portion: "1 bowl (150g)", calories: 185, protein: 18.0, carbs: 14.0, fats: 5.5, favorite: true },
+      { id: "f-34", name: "Palak Paneer", portion: "1 bowl (180g)", calories: 260, protein: 13.0, carbs: 8.0, fats: 19.0, favorite: false },
+      { id: "f-35", name: "Bhindi Masala (Okra)", portion: "1 katori (120g)", calories: 110, protein: 2.5, carbs: 11.0, fats: 6.5, favorite: false },
+      { id: "f-36", name: "Aloo Gobhi Sabzi", portion: "1 katori (130g)", calories: 135, protein: 3.0, carbs: 18.0, fats: 6.0, favorite: false },
+      { id: "f-37", name: "Sprouts Salad (Moong/Chana)", portion: "1 bowl (150g)", calories: 130, protein: 9.0, carbs: 22.0, fats: 0.8, favorite: true },
+      { id: "f-38", name: "Whey Protein in Water", portion: "1 scoop (30g)", calories: 120, protein: 24.0, carbs: 2.0, fats: 1.5, favorite: true }
+    ];
+
+    window.allDayRecords = JSON.parse(localStorage.getItem('nutritrack_days') || '{}');
+    window.bodyWeights = JSON.parse(localStorage.getItem('nutritrack_weights') || '{}');
+    window.dayReviews = JSON.parse(localStorage.getItem('nutritrack_reviews') || '{}');
+    window.indianFoodDatabase = JSON.parse(localStorage.getItem('nutritrack_custom_foods') || 'null') || DEFAULT_INDIAN_FOODS;
+
+    window.currentDate = new Date();
+    window.currentSelectedDateStr = formatDateKey(new Date());
+    window.activeMealTarget = "Breakfast";
+    window.filterOnlyFavs = false;
+
+    function formatDateKey(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-neutral-700', 'text-white');
+        btn.classList.add('text-neutral-400');
+      });
+
+      const pane = document.getElementById('tab-' + tabId);
+      if (pane) pane.classList.remove('hidden');
+
+      const activeNav = document.getElementById('nav-' + tabId);
+      if (activeNav) {
+        activeNav.classList.add('bg-neutral-700', 'text-white');
+        activeNav.classList.remove('text-neutral-400');
+      }
+
+      if (tabId === 'calendar') renderCalendar();
+      if (tabId === 'diary') renderCurrentDayDiary();
+      if (tabId === 'foods') renderFoodLibrary();
+      if (tabId === 'review') renderReviewView();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function changeMonth(offset) {
+      window.currentDate.setMonth(window.currentDate.getMonth() + offset);
+      renderCalendar();
+    }
+
+    function goToToday() {
+      window.currentDate = new Date();
+      window.currentSelectedDateStr = formatDateKey(new Date());
+      renderCalendar();
+      renderCurrentDayDiary();
+    }
+
+    function renderCalendar() {
+      const year = window.currentDate.getFullYear();
+      const month = window.currentDate.getMonth();
+      const firstDayIndex = new Date(year, month, 1).getDay();
+      const totalDays = new Date(year, month + 1, 0).getDate();
+      const monthName = window.currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+      document.getElementById('calendarMonthLabel').textContent = monthName;
+      const grid = document.getElementById('calendarDaysGrid');
+      grid.innerHTML = '';
+
+      let loggedDaysCount = 0;
+      let monthTotalCal = 0;
+      let monthTotalPro = 0;
+
+      for (let i = 0; i < firstDayIndex; i++) {
+        const blank = document.createElement('div');
+        blank.className = "h-20 sm:h-24 rounded-xl bg-neutral-900/30 border border-neutral-800/40 opacity-40";
+        grid.appendChild(blank);
+      }
+
+      const todayStr = formatDateKey(new Date());
+      for (let day = 1; day <= totalDays; day++) {
+        const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayRecord = window.allDayRecords[dateKey] || null;
+        const weightVal = window.bodyWeights[dateKey] || null;
+
+        let dayCal = 0;
+        let dayPro = 0;
+
+        if (dayRecord) {
+          ['Breakfast', 'Lunch', 'Snacks', 'Dinner'].forEach(m => {
+            if (dayRecord[m]) {
+              dayRecord[m].forEach(item => {
+                dayCal += item.calories || 0;
+                dayPro += item.protein || 0;
+              });
+            }
+          });
+          if (dayCal > 0 || dayPro > 0) {
+            loggedDaysCount++;
+            monthTotalCal += dayCal;
+            monthTotalPro += dayPro;
+          }
+        }
+
+        const isToday = (dateKey === todayStr);
+        const isSelected = (dateKey === window.currentSelectedDateStr);
+
+        const cell = document.createElement('div');
+        cell.className = `h-20 sm:h-24 p-2 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+          isSelected 
+            ? 'border-amber-500 bg-amber-500/10' 
+            : isToday 
+              ? 'border-amber-500/60 bg-neutral-800/90' 
+              : 'border-neutral-800 bg-neutral-800/40 hover:border-neutral-700 hover:bg-neutral-800'
+        }`;
+
+        cell.onclick = () => {
+          window.currentSelectedDateStr = dateKey;
+          switchTab('diary');
+        };
+
+        cell.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold ${isToday ? 'text-amber-400' : 'text-neutral-300'}">${day}</span>
+            ${weightVal ? `<span class="badge-pill px-1.5 py-0.5 rounded bg-neutral-700 text-amber-300 font-bold">${weightVal}k</span>` : ''}
+          </div>
+          <div class="space-y-0.5">
+            ${dayCal > 0 ? `<div class="badge-pill text-amber-400 font-semibold truncate">${Math.round(dayCal)} kcal</div>` : ''}
+            ${dayPro > 0 ? `<div class="badge-pill text-emerald-400 font-semibold truncate">${Math.round(dayPro)}g P</div>` : ''}
+            ${(!dayCal && !weightVal) ? `<div class="text-[9px] text-neutral-600 italic">No log</div>` : ''}
+          </div>
+        `;
+        grid.appendChild(cell);
+      }
+
+      document.getElementById('statLoggedDays').textContent = loggedDaysCount;
+      document.getElementById('statAvgCalories').innerHTML = `${loggedDaysCount ? Math.round(monthTotalCal / loggedDaysCount) : 0} <span class="text-xs font-normal text-neutral-400">kcal</span>`;
+      document.getElementById('statAvgProtein').innerHTML = `${loggedDaysCount ? Math.round(monthTotalPro / loggedDaysCount) : 0} <span class="text-xs font-normal text-neutral-400">g</span>`;
+    }
+
+    function onDateInputChange(newDateStr) {
+      if (newDateStr) {
+        window.currentSelectedDateStr = newDateStr;
+        renderCurrentDayDiary();
+      }
+    }
+
+    function navigateDay(offset) {
+      const parts = window.currentSelectedDateStr.split('-');
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      d.setDate(d.getDate() + offset);
+      window.currentSelectedDateStr = formatDateKey(d);
+      renderCurrentDayDiary();
+    }
+
+    function renderCurrentDayDiary() {
+      const dateStr = window.currentSelectedDateStr;
+      document.getElementById('diaryDatePicker').value = dateStr;
+
+      const dateObj = new Date(dateStr + "T00:00:00");
+      document.getElementById('diaryDateHuman').textContent = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+
+      updateWeightInputForDate();
+
+      const dayRecord = window.allDayRecords[dateStr] || { Breakfast: [], Lunch: [], Snacks: [], Dinner: [] };
+      let totalCal = 0, totalPro = 0, totalCarb = 0, totalFat = 0;
+      const meals = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
+
+      meals.forEach(meal => {
+        const listEl = document.getElementById('list-' + meal);
+        const sumEl = document.getElementById('sum-' + meal);
+        listEl.innerHTML = '';
+
+        const items = dayRecord[meal] || [];
+        let mCal = 0, mPro = 0;
+
+        if (items.length === 0) {
+          listEl.innerHTML = `<p class="py-2.5 text-xs text-neutral-500 italic">No food logged yet for ${meal}.</p>`;
+        } else {
+          items.forEach((item, idx) => {
+            mCal += item.calories || 0;
+            mPro += item.protein || 0;
+            totalCarb += item.carbs || 0;
+            totalFat += item.fats || 0;
+
+            const row = document.createElement('div');
+            row.className = "py-2.5 flex items-center justify-between text-xs";
+            row.innerHTML = `
+              <div class="flex-1 pr-2">
+                <span class="font-bold text-neutral-200">${item.name}</span>
+                <span class="text-neutral-400 ml-1.5 text-[11px]">(${item.portion || '1 serving'})</span>
+              </div>
+              <div class="flex items-center gap-3 shrink-0">
+                <span class="text-neutral-300 font-semibold">${item.calories} kcal</span>
+                <span class="text-emerald-400 font-semibold">${item.protein}g P</span>
+                <button onclick="removeMealItem('${meal}', ${idx})" class="text-neutral-500 hover:text-rose-400 transition p-1">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            `;
+            listEl.appendChild(row);
+          });
+        }
+
+        sumEl.textContent = `${Math.round(mCal)} kcal • ${Math.round(mPro)}g Protein`;
+        totalCal += mCal;
+        totalPro += mPro;
+      });
+
+      document.getElementById('dayCalorieTotal').textContent = Math.round(totalCal);
+      document.getElementById('dayProteinTotal').textContent = Math.round(totalPro);
+      document.getElementById('dayCarbTotal').textContent = Math.round(totalCarb);
+      document.getElementById('dayFatTotal').textContent = Math.round(totalFat);
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function updateWeightInputForDate() {
+      const weight = window.bodyWeights[window.currentSelectedDateStr] || '';
+      document.getElementById('dailyWeightInput').value = weight;
+    }
+
+    function saveDailyWeight() {
+      const val = parseFloat(document.getElementById('dailyWeightInput').value);
+      if (isNaN(val) || val <= 0) {
+        delete window.bodyWeights[window.currentSelectedDateStr];
+      } else {
+        window.bodyWeights[window.currentSelectedDateStr] = val;
+      }
+      localStorage.setItem('nutritrack_weights', JSON.stringify(window.bodyWeights));
+      if (window.cloudSaveWeight) {
+        window.cloudSaveWeight(window.currentSelectedDateStr, val || null);
+      }
+      showCustomAlert(`Weight for ${window.currentSelectedDateStr} saved: ${val || 0} kg`);
+      renderCalendar();
+    }
+
+    function removeMealItem(meal, idx) {
+      const dateStr = window.currentSelectedDateStr;
+      if (window.allDayRecords[dateStr] && window.allDayRecords[dateStr][meal]) {
+        window.allDayRecords[dateStr][meal].splice(idx, 1);
+        localStorage.setItem('nutritrack_days', JSON.stringify(window.allDayRecords));
+        if (window.cloudSaveDay) {
+          window.cloudSaveDay(dateStr, window.allDayRecords[dateStr]);
+        }
+        renderCurrentDayDiary();
+        renderCalendar();
+      }
+    }
+
+    function openAddFoodModal(meal) {
+      window.activeMealTarget = meal;
+      document.getElementById('modalMealTitle').textContent = `Add Food to ${meal}`;
+      document.getElementById('modalMealSelect').value = meal;
+      document.getElementById('foodInputDescription').value = '';
+      document.getElementById('foodInputWeight').value = '';
+      document.getElementById('inputCalories').value = 0;
+      document.getElementById('inputProtein').value = 0;
+      document.getElementById('inputCarbs').value = 0;
+      document.getElementById('inputFats').value = 0;
+      document.getElementById('addFoodModal').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeAddFoodModal() {
+      document.getElementById('addFoodModal').classList.add('hidden');
+    }
+
+    async function analyzeFoodSmart() {
+      const query = document.getElementById('foodInputDescription').value.trim();
+      const customWeight = document.getElementById('foodInputWeight').value.trim();
+      if (!query) {
+        showCustomAlert("Please enter a food description (e.g. 2 rotis with ghee, 1 katori dal).");
+        return;
+      }
+
+      const btn = document.getElementById('btnAnalyzeFood');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Calculating...`;
+      btn.disabled = true;
+
+      const apiKey = localStorage.getItem('nutritrack_gemini_api_key') || "";
+
+      if (apiKey) {
+        try {
+          const prompt = `You are an expert Indian dietitian. Calculate the nutritional profile for: "${query}" ${customWeight ? `with portion: ${customWeight}` : ''}.
+Return strict JSON with schema:
+{
+  "foodName": "Standardized Indian Dish Name",
+  "portion": "e.g. 2 pieces (70g)",
+  "calories": number,
+  "protein": number,
+  "carbs": number,
+  "fats": number
+}`;
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { responseMimeType: "application/json" }
+            })
+          });
+
+          const data = await response.json();
+          const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
+
+          document.getElementById('foodInputDescription').value = parsed.foodName || query;
+          document.getElementById('foodInputWeight').value = parsed.portion || customWeight || '1 serving';
+          document.getElementById('inputCalories').value = Math.round(parsed.calories || 0);
+          document.getElementById('inputProtein').value = parseFloat(parsed.protein || 0).toFixed(1);
+          document.getElementById('inputCarbs').value = parseFloat(parsed.carbs || 0).toFixed(1);
+          document.getElementById('inputFats').value = parseFloat(parsed.fats || 0).toFixed(1);
+
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          if (window.lucide) lucide.createIcons();
+          return;
+        } catch (err) {
+          console.warn("Gemini call fell back to local Indian database:", err);
+        }
+      }
+
+      // Offline Indian Fallback Database search & multiplier
+      const match = findOfflineIndianFood(query);
+      let multiplier = 1;
+
+      const numMatch = query.match(/^(\d+(\.\d+)?)/);
+      if (numMatch) {
+        multiplier = parseFloat(numMatch[1]);
+      } else if (customWeight && customWeight.match(/^(\d+)/)) {
+        const grams = parseFloat(customWeight);
+        if (grams > 10) multiplier = grams / 100;
+      }
+
+      if (match) {
+        document.getElementById('foodInputDescription').value = match.name;
+        document.getElementById('foodInputWeight').value = customWeight || `${multiplier > 1 ? multiplier + ' x ' : ''}${match.portion}`;
+        document.getElementById('inputCalories').value = Math.round(match.calories * multiplier);
+        document.getElementById('inputProtein').value = (match.protein * multiplier).toFixed(1);
+        document.getElementById('inputCarbs').value = (match.carbs * multiplier).toFixed(1);
+        document.getElementById('inputFats').value = (match.fats * multiplier).toFixed(1);
+      } else {
+        document.getElementById('inputCalories').value = Math.round(200 * multiplier);
+        document.getElementById('inputProtein').value = (6 * multiplier).toFixed(1);
+        document.getElementById('inputCarbs').value = (28 * multiplier).toFixed(1);
+        document.getElementById('inputFats').value = (7 * multiplier).toFixed(1);
+      }
+
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function findOfflineIndianFood(text) {
+      const q = text.toLowerCase();
+      return window.indianFoodDatabase.find(f => {
+        const fn = f.name.toLowerCase();
+        return q.includes(fn) || fn.includes(q) || 
+          (q.includes('roti') && fn.includes('roti')) ||
+          (q.includes('dal') && fn.includes('dal')) ||
+          (q.includes('rice') && fn.includes('rice')) ||
+          (q.includes('paneer') && fn.includes('paneer')) ||
+          (q.includes('egg') && fn.includes('egg')) ||
+          (q.includes('poha') && fn.includes('poha'));
+      });
+    }
+
+    function confirmAddFoodItem() {
+      const name = document.getElementById('foodInputDescription').value.trim();
+      const portion = document.getElementById('foodInputWeight').value.trim() || '1 serving';
+      const targetMeal = document.getElementById('modalMealSelect').value;
+      const cal = parseFloat(document.getElementById('inputCalories').value) || 0;
+      const pro = parseFloat(document.getElementById('inputProtein').value) || 0;
+      const carb = parseFloat(document.getElementById('inputCarbs').value) || 0;
+      const fat = parseFloat(document.getElementById('inputFats').value) || 0;
+
+      if (!name) {
+        showCustomAlert("Please enter food name");
+        return;
+      }
+
+      const dateStr = window.currentSelectedDateStr;
+      if (!window.allDayRecords[dateStr]) {
+        window.allDayRecords[dateStr] = { Breakfast: [], Lunch: [], Snacks: [], Dinner: [] };
+      }
+      if (!window.allDayRecords[dateStr][targetMeal]) {
+        window.allDayRecords[dateStr][targetMeal] = [];
+      }
+
+      const newItem = { name, portion, calories: cal, protein: pro, carbs: carb, fats: fat, timestamp: Date.now() };
+      window.allDayRecords[dateStr][targetMeal].push(newItem);
+
+      localStorage.setItem('nutritrack_days', JSON.stringify(window.allDayRecords));
+      if (window.cloudSaveDay) {
+        window.cloudSaveDay(dateStr, window.allDayRecords[dateStr]);
+      }
+
+      closeAddFoodModal();
+      renderCurrentDayDiary();
+      renderCalendar();
+    }
+
+    function renderFoodLibrary() {
+      const grid = document.getElementById('foodLibraryGrid');
+      const search = (document.getElementById('foodSearchInput').value || '').toLowerCase().trim();
+      grid.innerHTML = '';
+
+      let list = window.indianFoodDatabase;
+      if (window.filterOnlyFavs) {
+        list = list.filter(f => f.favorite);
+      }
+      if (search) {
+        list = list.filter(f => f.name.toLowerCase().includes(search) || f.portion.toLowerCase().includes(search));
+      }
+
+      if (list.length === 0) {
+        grid.innerHTML = `<p class="col-span-full py-8 text-center text-xs text-neutral-400">No dishes match your filter.</p>`;
+        return;
+      }
+
+      list.forEach(food => {
+        const card = document.createElement('div');
+        card.className = "p-4 bg-neutral-800/60 rounded-2xl border border-neutral-800 hover:border-neutral-700 flex flex-col justify-between transition";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="font-bold text-sm text-white">${food.name}</h3>
+              <button onclick="toggleFoodFavorite('${food.id}')" class="p-1 text-neutral-400 hover:text-amber-400">
+                <i data-lucide="star" class="w-4 h-4 ${food.favorite ? 'text-amber-400 fill-amber-400' : ''}"></i>
+              </button>
+            </div>
+            <p class="text-[11px] text-neutral-400 mt-0.5">${food.portion}</p>
+            <div class="mt-3 grid grid-cols-4 gap-1 text-center py-2 bg-neutral-900/60 rounded-xl text-xs font-semibold">
+              <div>
+                <span class="text-[10px] text-neutral-400 block">Kcal</span>
+                <span class="text-white">${food.calories}</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-neutral-400 block">Protein</span>
+                <span class="text-emerald-400">${food.protein}g</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-neutral-400 block">Carbs</span>
+                <span class="text-neutral-300">${food.carbs}g</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-neutral-400 block">Fat</span>
+                <span class="text-neutral-300">${food.fats}g</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-neutral-700/60 flex items-center justify-between">
+            <select id="quickMealSelect-${food.id}" class="text-[11px] bg-neutral-900 border border-neutral-700 rounded-lg px-2 py-1 text-neutral-300">
+              <option value="Breakfast">Breakfast</option>
+              <option value="Lunch">Lunch</option>
+              <option value="Snacks">Snacks</option>
+              <option value="Dinner">Dinner</option>
+            </select>
+            <div class="flex items-center gap-1.5">
+              ${food.isCustom ? `<button onclick="deleteCustomFood('${food.id}')" class="text-neutral-500 hover:text-rose-400 p-1" title="Delete custom dish"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}
+              <button onclick="quickAddFoodToDate('${food.id}')" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-lg transition flex items-center gap-1">
+                <i data-lucide="plus" class="w-3 h-3"></i> Add
+              </button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function toggleFavFilter() {
+      window.filterOnlyFavs = !window.filterOnlyFavs;
+      const btn = document.getElementById('filterFavBtn');
+      if (window.filterOnlyFavs) {
+        btn.classList.add('bg-amber-500/20', 'border-amber-500/40', 'text-amber-400');
+      } else {
+        btn.classList.remove('bg-amber-500/20', 'border-amber-500/40', 'text-amber-400');
+      }
+      renderFoodLibrary();
+    }
+
+    function toggleFoodFavorite(foodId) {
+      const food = window.indianFoodDatabase.find(f => f.id === foodId);
+      if (food) {
+        food.favorite = !food.favorite;
+        localStorage.setItem('nutritrack_custom_foods', JSON.stringify(window.indianFoodDatabase));
+        if (window.cloudSaveFood) window.cloudSaveFood(food);
+        renderFoodLibrary();
+      }
+    }
+
+    function quickAddFoodToDate(foodId) {
+      const food = window.indianFoodDatabase.find(f => f.id === foodId);
+      const targetMeal = document.getElementById(`quickMealSelect-${foodId}`).value;
+      const dateStr = window.currentSelectedDateStr;
+
+      if (!window.allDayRecords[dateStr]) {
+        window.allDayRecords[dateStr] = { Breakfast: [], Lunch: [], Snacks: [], Dinner: [] };
+      }
+      if (!window.allDayRecords[dateStr][targetMeal]) {
+        window.allDayRecords[dateStr][targetMeal] = [];
+      }
+
+      window.allDayRecords[dateStr][targetMeal].push({
+        name: food.name,
+        portion: food.portion,
+        calories: food.calories,
+        protein: food.protein,
+        carbs: food.carbs,
+        fats: food.fats,
+        timestamp: Date.now()
+      });
+
+      localStorage.setItem('nutritrack_days', JSON.stringify(window.allDayRecords));
+      if (window.cloudSaveDay) window.cloudSaveDay(dateStr, window.allDayRecords[dateStr]);
+      showCustomAlert(`Added "${food.name}" to ${targetMeal}!`);
+    }
+
+    function openCustomFoodModal() {
+      document.getElementById('customFoodName').value = '';
+      document.getElementById('customFoodPortion').value = '';
+      document.getElementById('customFoodCal').value = '';
+      document.getElementById('customFoodPro').value = '';
+      document.getElementById('customFoodCarb').value = '';
+      document.getElementById('customFoodFat').value = '';
+      document.getElementById('customFoodModal').classList.remove('hidden');
+    }
+
+    function closeCustomFoodModal() {
+      document.getElementById('customFoodModal').classList.add('hidden');
+    }
+
+    function saveCustomFoodItem() {
+      const name = document.getElementById('customFoodName').value.trim();
+      const portion = document.getElementById('customFoodPortion').value.trim() || '1 serving (100g)';
+      const cal = parseFloat(document.getElementById('customFoodCal').value) || 0;
+      const pro = parseFloat(document.getElementById('customFoodPro').value) || 0;
+      const carb = parseFloat(document.getElementById('customFoodCarb').value) || 0;
+      const fat = parseFloat(document.getElementById('customFoodFat').value) || 0;
+
+      if (!name) {
+        showCustomAlert("Please enter food name");
+        return;
+      }
+
+      const newDish = {
+        id: "custom-" + Date.now(),
+        name,
+        portion,
+        calories: cal,
+        protein: pro,
+        carbs: carb,
+        fats: fat,
+        favorite: true,
+        isCustom: true
+      };
+
+      window.indianFoodDatabase.unshift(newDish);
+      localStorage.setItem('nutritrack_custom_foods', JSON.stringify(window.indianFoodDatabase));
+      if (window.cloudSaveFood) window.cloudSaveFood(newDish);
+
+      closeCustomFoodModal();
+      renderFoodLibrary();
+      showCustomAlert(`Custom dish "${name}" created!`);
+    }
+
+    function deleteCustomFood(foodId) {
+      window.indianFoodDatabase = window.indianFoodDatabase.filter(f => f.id !== foodId);
+      localStorage.setItem('nutritrack_custom_foods', JSON.stringify(window.indianFoodDatabase));
+      renderFoodLibrary();
+      showCustomAlert("Dish deleted.");
+    }
+
+    async function generateDailyReview() {
+      const dateStr = window.currentSelectedDateStr;
+      const dayRecord = window.allDayRecords[dateStr];
+
+      if (!dayRecord) {
+        showCustomAlert("Please log some Indian meals first before running AI diagnosis.");
+        return;
+      }
+
+      let totalItems = 0;
+      ['Breakfast', 'Lunch', 'Snacks', 'Dinner'].forEach(m => {
+        totalItems += (dayRecord[m] || []).length;
+      });
+
+      if (totalItems === 0) {
+        showCustomAlert("No meals logged yet today. Add foods to your diary first.");
+        return;
+      }
+
+      switchTab('review');
+      document.getElementById('reviewEmptyState').classList.add('hidden');
+      document.getElementById('reviewContentArea').classList.add('hidden');
+      document.getElementById('reviewLoadingState').classList.remove('hidden');
+
+      const apiKey = localStorage.getItem('nutritrack_gemini_api_key') || "";
+      const currentWeight = window.bodyWeights[dateStr] || "Not logged";
+
+      if (apiKey) {
+        try {
+          const prompt = `Act as an expert Indian Dietitian & Clinical Nutritionist.
+Evaluate this daily Indian food log for date ${dateStr} (User Weight: ${currentWeight} kg):
+${JSON.stringify(dayRecord, null, 2)}
+
+Provide an honest diagnosis adhering strictly to Indian dietary contexts:
+1. What went well (e.g. good home cooking, lentils, hydration, portion discipline).
+2. What was wrong or needs improvement (e.g. carb dominance, low protein density, heavy refined oils/ghee, sugar in tea).
+3. Actionable Indian recommendations (realistic swaps like adding paneer, sattu, boiled eggs, curd, sprouts, less white rice).
+
+Return STRICT JSON:
+{
+  "goodPoints": ["point 1", "point 2"],
+  "badPoints": ["concern 1", "concern 2"],
+  "recommendations": ["recommendation 1", "recommendation 2"]
+}`;
+
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { responseMimeType: "application/json" }
+            })
+          });
+
+          const data = await response.json();
+          const reviewObj = JSON.parse(data.candidates[0].content.parts[0].text);
+
+          window.dayReviews[dateStr] = reviewObj;
+          localStorage.setItem('nutritrack_reviews', JSON.stringify(window.dayReviews));
+          renderReviewView();
+          return;
+        } catch (err) {
+          console.warn("AI diagnosis fell back to rules engine:", err);
+        }
+      }
+
+      // Offline Indian Dietetic Diagnostic Rules Engine
+      let totalCal = 0, totalPro = 0, totalCarb = 0, totalFat = 0;
+      ['Breakfast', 'Lunch', 'Snacks', 'Dinner'].forEach(m => {
+        (dayRecord[m] || []).forEach(i => {
+          totalCal += i.calories || 0;
+          totalPro += i.protein || 0;
+          totalCarb += i.carbs || 0;
+          totalFat += i.fats || 0;
+        });
+      });
+
+      const good = [];
+      const bad = [];
+      const recs = [];
+
+      if (totalPro >= 60) {
+        good.push(`Decent protein intake achieved (${Math.round(totalPro)}g) supporting muscle maintenance.`);
+      } else {
+        bad.push(`Low protein intake (${Math.round(totalPro)}g). Traditional Indian diets tend to be carb-heavy without deliberate protein sources.`);
+        recs.push(`Boost protein by adding 100g Paneer, 1 bowl sprouted Moong, roasted Sattu drink, or 2 boiled eggs.`);
+      }
+
+      if (totalCal > 2400) {
+        bad.push(`High daily caloric load (${Math.round(totalCal)} kcal). Extra ghee, fried snacks, or large rice servings may be contributing.`);
+        recs.push(`Limit cooking oils/ghee to 2 teaspoons per meal and switch from fried snacks to roasted makhana or chana.`);
+      } else if (totalCal >= 1400 && totalCal <= 2100) {
+        good.push(`Well-regulated daily calories (${Math.round(totalCal)} kcal) within a healthy Indian maintenance range.`);
+      }
+
+      if (totalCarb > 250) {
+        bad.push(`Excessive simple carbohydrates (${Math.round(totalCarb)}g). Large portions of white rice and wheat rotis can cause blood sugar spikes.`);
+        recs.push(`Replace half of your rice with a katori of salad or increase dal/sabzi portion to lower glycemic response.`);
+      } else {
+        good.push(`Controlled carbohydrate balance (${Math.round(totalCarb)}g).`);
+      }
+
+      good.push(`Recorded meals across distinct meal intervals (Breakfast, Lunch, Snacks, Dinner).`);
+      recs.push(`Ensure 2.5 to 3 liters of water or salted chaas (buttermilk) for digestive health.`);
+
+      const offlineReview = { goodPoints: good, badPoints: bad, recommendations: recs };
+      window.dayReviews[dateStr] = offlineReview;
+      localStorage.setItem('nutritrack_reviews', JSON.stringify(window.dayReviews));
+      renderReviewView();
+    }
+
+    function renderReviewView() {
+      const dateStr = window.currentSelectedDateStr;
+      const review = window.dayReviews[dateStr];
+
+      document.getElementById('reviewLoadingState').classList.add('hidden');
+
+      if (!review) {
+        document.getElementById('reviewEmptyState').classList.remove('hidden');
+        document.getElementById('reviewContentArea').classList.add('hidden');
+        return;
+      }
+
+      document.getElementById('reviewEmptyState').classList.add('hidden');
+      document.getElementById('reviewContentArea').classList.remove('hidden');
+
+      const goodList = document.getElementById('reviewGoodList');
+      const badList = document.getElementById('reviewBadList');
+      const recBox = document.getElementById('reviewRecommendations');
+
+      goodList.innerHTML = review.goodPoints.map(p => `<li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>${p}</span></li>`).join('');
+      badList.innerHTML = review.badPoints.map(p => `<li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 shrink-0 mt-0.5"></i><span>${p}</span></li>`).join('');
+      recBox.innerHTML = review.recommendations.map(r => `<div class="p-2.5 bg-neutral-900/60 rounded-xl border border-neutral-700/60 flex items-start gap-2"><i data-lucide="arrow-right" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i><span>${r}</span></div>`).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openApiKeyModal() {
+      document.getElementById('geminiApiKeyInput').value = localStorage.getItem('nutritrack_gemini_api_key') || "";
+      document.getElementById('apiKeyModal').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeApiKeyModal() {
+      document.getElementById('apiKeyModal').classList.add('hidden');
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById('geminiApiKeyInput').value.trim();
+      if (key) {
+        localStorage.setItem('nutritrack_gemini_api_key', key);
+        document.getElementById('apiKeyStatusLabel').textContent = "AI Active";
+        showCustomAlert("Gemini API Key saved permanently in your browser.");
+      } else {
+        localStorage.removeItem('nutritrack_gemini_api_key');
+        document.getElementById('apiKeyStatusLabel').textContent = "Gemini AI";
+      }
+      closeApiKeyModal();
+    }
+
+    function clearApiKey() {
+      localStorage.removeItem('nutritrack_gemini_api_key');
+      document.getElementById('apiKeyStatusLabel').textContent = "Gemini AI";
+      closeApiKeyModal();
+      showCustomAlert("API Key removed. Switched to offline database.");
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.setItem('nutritrack_theme', 'light');
+      } else {
+        html.classList.add('dark');
+        localStorage.setItem('nutritrack_theme', 'dark');
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function showCustomAlert(msg) {
+      const toast = document.createElement('div');
+      toast.className = "fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-xl bg-neutral-800 text-white border border-neutral-700 shadow-2xl text-xs font-semibold flex items-center gap-2 transform transition-all duration-300";
+      toast.innerHTML = `<i data-lucide="info" class="w-4 h-4 text-amber-400"></i> <span>${msg}</span>`;
+      document.body.appendChild(toast);
+      if (window.lucide) lucide.createIcons();
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    window.addEventListener('load', () => {
+      const savedTheme = localStorage.getItem('nutritrack_theme') || 'dark';
+      if (savedTheme === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+
+      if (localStorage.getItem('nutritrack_gemini_api_key')) {
+        const badge = document.getElementById('apiKeyStatusLabel');
+        if (badge) badge.textContent = "AI Active";
+      }
+
+      switchTab('calendar');
+      renderCurrentDayDiary();
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

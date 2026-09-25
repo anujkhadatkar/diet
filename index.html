@@ -98,7 +98,7 @@
       border-color: #cbd5e1 !important;
     }
     html:not(.dark) #tab-diary .bg-gradient-to-r {
-      background: linear-color(to right, rgba(245, 158, 11, 0.08), transparent) !important;
+      background: linear-gradient(to right, rgba(245, 158, 11, 0.08), transparent) !important;
     }
   </style>
 </head>
@@ -782,7 +782,7 @@
       { id: "f-3", name: "Yellow Dal Tadka (Arhar/Toor)", portion: "1 katori (150g)", calories: 145, protein: 7.5, carbs: 20.0, fats: 4.0, favorite: true },
       { id: "f-4", name: "Moong Dal (Simple Boiled)", portion: "1 katori (150g)", calories: 120, protein: 8.5, carbs: 18.0, fats: 1.5, favorite: false },
       { id: "f-5", name: "Basmati Steamed Rice", portion: "1 katori (150g cooked)", calories: 195, protein: 4.0, carbs: 43.0, fats: 0.5, favorite: true },
-      { id: "f-6", name: "Brown Rice", portion: "1 katori (150g cooked)", calories: 165, protein: 3.5, carbs: 35.0, fats: 1.2, favorite: false },
+      { id: "f-6", name: "Brown Rice", portion: "1 katori (150g)", calories: 165, protein: 3.5, carbs: 35.0, fats: 1.2, favorite: false },
       { id: "f-7", name: "Paneer Bhurji", portion: "1 cup (150g)", calories: 285, protein: 16.5, carbs: 6.0, fats: 22.0, favorite: true },
       { id: "f-8", name: "Raw Paneer Cubes", portion: "100g", calories: 295, protein: 18.0, carbs: 3.5, fats: 23.0, favorite: false },
       { id: "f-9", name: "Curd / Dahi (Plain Homemade)", portion: "1 katori (150g)", calories: 95, protein: 5.5, carbs: 6.8, fats: 4.5, favorite: true },
@@ -991,6 +991,14 @@
           listEl.innerHTML = `<p class="py-2.5 text-xs text-neutral-500 italic">No food logged yet for ${meal}.</p>`;
         } else {
           items.forEach((item, idx) => {
+            if (!item.qty) item.qty = 1;
+            if (item.baseCalories === undefined) {
+              item.baseCalories = item.calories / item.qty;
+              item.baseProtein = item.protein / item.qty;
+              item.baseCarbs = (item.carbs || 0) / item.qty;
+              item.baseFats = (item.fats || 0) / item.qty;
+            }
+
             mCal += item.calories || 0;
             mPro += item.protein || 0;
             totalCarb += item.carbs || 0;
@@ -1003,9 +1011,20 @@
                 <span class="font-bold text-neutral-200">${item.name}</span>
                 <span class="text-neutral-400 ml-1.5 text-[11px]">(${item.portion || '1 serving'})</span>
               </div>
-              <div class="flex items-center gap-3 shrink-0">
-                <span class="text-neutral-300 font-semibold">${item.calories} kcal</span>
-                <span class="text-emerald-400 font-semibold">${item.protein}g P</span>
+              <div class="flex items-center gap-2 shrink-0">
+                <div class="flex items-center space-x-1 bg-neutral-900 border border-neutral-700/60 rounded-lg px-1.5 py-0.5 mr-1">
+                  <button onclick="updateMealItemQuantity('${meal}', ${idx}, -1)" class="text-neutral-400 hover:text-amber-400 text-xs font-bold px-1 transition">
+                    −
+                  </button>
+                  <span class="text-[11px] font-semibold text-amber-400 min-w-[18px] text-center">
+                    ${item.qty}x
+                  </span>
+                  <button onclick="updateMealItemQuantity('${meal}', ${idx}, 1)" class="text-neutral-400 hover:text-amber-400 text-xs font-bold px-1 transition">
+                    +
+                  </button>
+                </div>
+                <span class="text-neutral-300 font-semibold">${Math.round(item.calories)} kcal</span>
+                <span class="text-emerald-400 font-semibold">${item.protein.toFixed(1)}g P</span>
                 <button onclick="removeMealItem('${meal}', ${idx})" class="text-neutral-500 hover:text-rose-400 transition p-1">
                   <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 </button>
@@ -1026,6 +1045,41 @@
       document.getElementById('dayFatTotal').textContent = Math.round(totalFat);
 
       if (window.lucide) lucide.createIcons();
+    }
+
+    function updateMealItemQuantity(meal, idx, change) {
+      const dateStr = window.currentSelectedDateStr;
+      if (!window.allDayRecords[dateStr] || !window.allDayRecords[dateStr][meal]) return;
+
+      const item = window.allDayRecords[dateStr][meal][idx];
+      if (!item) return;
+
+      if (!item.qty) item.qty = 1;
+      if (item.baseCalories === undefined) {
+        item.baseCalories = item.calories / item.qty;
+        item.baseProtein = item.protein / item.qty;
+        item.baseCarbs = (item.carbs || 0) / item.qty;
+        item.baseFats = (item.fats || 0) / item.qty;
+      }
+
+      const newQty = item.qty + change;
+      if (newQty <= 0) {
+        removeMealItem(meal, idx);
+        return;
+      }
+
+      item.qty = newQty;
+      item.calories = Math.round(item.baseCalories * newQty);
+      item.protein = parseFloat((item.baseProtein * newQty).toFixed(1));
+      item.carbs = parseFloat((item.baseCarbs * newQty).toFixed(1));
+      item.fats = parseFloat((item.baseFats * newQty).toFixed(1));
+
+      localStorage.setItem('nutritrack_days', JSON.stringify(window.allDayRecords));
+      if (window.cloudSaveDay) {
+        window.cloudSaveDay(dateStr, window.allDayRecords[dateStr]);
+      }
+      renderCurrentDayDiary();
+      renderCalendar();
     }
 
     function updateWeightInputForDate() {
@@ -1095,11 +1149,18 @@
       // Primary AI Engine: Firebase Vertex AI
       if (window.APP_STATE && window.APP_STATE.aiModel) {
         try {
-          const prompt = `You are an expert Indian dietitian. Calculate the nutritional profile for: "${query}" ${customWeight ? `with portion: ${customWeight}` : ''}.
-Return strict JSON without markdown backticks:
+          const portionStr = customWeight || '1 standard serving';
+          const prompt = `You are an expert Indian dietitian.
+Food Item: "${query}"
+Specified Portion/Quantity: "${portionStr}"
+
+Task: Calculate the TOTAL nutritional values for the ENTIRE specified quantity ("${portionStr}").
+Do NOT return the value for a single unit or default 100g if the quantity specifies more (for example, if portion is "2 pieces" or "2 eggs", double the values).
+
+Return STRICT JSON without markdown backticks:
 {
-  "foodName": "Standardized Indian Dish Name",
-  "portion": "e.g. 2 pieces (70g)",
+  "foodName": "${query}",
+  "portion": "${portionStr}",
   "calories": number,
   "protein": number,
   "carbs": number,
@@ -1110,7 +1171,7 @@ Return strict JSON without markdown backticks:
           const parsed = JSON.parse(rawText);
 
           document.getElementById('foodInputDescription').value = parsed.foodName || query;
-          document.getElementById('foodInputWeight').value = parsed.portion || customWeight || '1 serving';
+          document.getElementById('foodInputWeight').value = parsed.portion || portionStr;
           document.getElementById('inputCalories').value = Math.round(parsed.calories || 0);
           document.getElementById('inputProtein').value = parseFloat(parsed.protein || 0).toFixed(1);
           document.getElementById('inputCarbs').value = parseFloat(parsed.carbs || 0).toFixed(1);
@@ -1129,12 +1190,14 @@ Return strict JSON without markdown backticks:
       const match = findOfflineIndianFood(query);
       let multiplier = 1;
 
-      const numMatch = query.match(/^(\d+(\.\d+)?)/);
-      if (numMatch) {
+      const combinedText = `${customWeight} ${query}`;
+      const numMatch = combinedText.match(/(\d+(\.\d+)?)\s*(piece|egg|roti|chilla|scoop|paratha|dosa|idli|bowl|katori|plate|cup)?/i);
+      const gramMatch = combinedText.match(/(\d+)\s*g/i);
+
+      if (gramMatch) {
+        multiplier = parseFloat(gramMatch[1]) / 100;
+      } else if (numMatch && parseFloat(numMatch[1]) > 0) {
         multiplier = parseFloat(numMatch[1]);
-      } else if (customWeight && customWeight.match(/^(\d+)/)) {
-        const grams = parseFloat(customWeight);
-        if (grams > 10) multiplier = grams / 100;
       }
 
       if (match) {
@@ -1192,7 +1255,20 @@ Return strict JSON without markdown backticks:
         window.allDayRecords[dateStr][targetMeal] = [];
       }
 
-      const newItem = { name, portion, calories: cal, protein: pro, carbs: carb, fats: fat, timestamp: Date.now() };
+      const newItem = { 
+        name, 
+        portion, 
+        calories: cal, 
+        protein: pro, 
+        carbs: carb, 
+        fats: fat, 
+        qty: 1,
+        baseCalories: cal,
+        baseProtein: pro,
+        baseCarbs: carb,
+        baseFats: fat,
+        timestamp: Date.now() 
+      };
       window.allDayRecords[dateStr][targetMeal].push(newItem);
 
       localStorage.setItem('nutritrack_days', JSON.stringify(window.allDayRecords));
@@ -1315,6 +1391,11 @@ Return strict JSON without markdown backticks:
         protein: food.protein,
         carbs: food.carbs,
         fats: food.fats,
+        qty: 1,
+        baseCalories: food.calories,
+        baseProtein: food.protein,
+        baseCarbs: food.carbs,
+        baseFats: food.fats,
         timestamp: Date.now()
       });
 

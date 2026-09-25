@@ -1150,14 +1150,17 @@
       if (window.APP_STATE && window.APP_STATE.aiModel) {
         try {
           const portionStr = customWeight || '1 standard serving';
-          const prompt = `You are an expert Indian dietitian.
+const prompt = `You are an expert Indian Clinical Dietitian referencing ICMR-NIN standards.
 Food Item: "${query}"
 Specified Portion/Quantity: "${portionStr}"
 
-Task: Calculate the TOTAL nutritional values for the ENTIRE specified quantity ("${portionStr}").
-Do NOT return the value for a single unit or default 100g if the quantity specifies more (for example, if portion is "2 pieces" or "2 eggs", double the values).
+STRICT NUTRITIONAL BASELINES FOR HOME-COOKED INDIAN MEALS:
+1. Steamed Rice (Cooked): 1 katori / 1 cup (150g cooked) = ~190-195 kcal, 4g protein, 43g carbs, 0.5g fat. (Uncooked dry raw rice is ~180 kcal per 50g).
+2. Home Sabzi (Bhindi, Aloo Gobhi, Lauki, Tinda, Karela, Gawar, Patta Gobhi): Home-style preparation with 1 tsp oil (5-7g fat) per 150g katori is only 110-140 kcal, NOT 250-400 kcal. Do not assume heavy restaurant butter/cream gravies unless explicitly typed.
+3. Plain / Tadka Dal: 1 katori (150g) = ~120-145 kcal, 7-8g protein.
+4. Scale every macro (calories, protein, carbs, fats) proportionally to the EXACT quantity requested ("${portionStr}").
 
-Return STRICT JSON without markdown backticks:
+Return ONLY valid JSON (no markdown backticks, no text explanations):
 {
   "foodName": "${query}",
   "portion": "${portionStr}",
@@ -1219,17 +1222,41 @@ Return STRICT JSON without markdown backticks:
       if (window.lucide) lucide.createIcons();
     }
 
-    function findOfflineIndianFood(text) {
-      const q = text.toLowerCase();
+function findOfflineIndianFood(text) {
+      const q = text.toLowerCase().trim();
+
+      // 1. Direct match check
+      const exact = window.indianFoodDatabase.find(f => f.name.toLowerCase() === q || q.includes(f.name.toLowerCase()));
+      if (exact) return exact;
+
+      // 2. Common Indian synonym map
+      const aliases = {
+        'rice': 'Basmati Steamed Rice',
+        'chawal': 'Basmati Steamed Rice',
+        'bhat': 'Basmati Steamed Rice',
+        'plain rice': 'Basmati Steamed Rice',
+        'white rice': 'Basmati Steamed Rice',
+        'sabji': 'Bhindi Masala (Okra)',
+        'sabzi': 'Bhindi Masala (Okra)',
+        'tari': 'Chicken Curry (Home-style)',
+        'curd': 'Curd / Dahi (Plain Homemade)',
+        'dahi': 'Curd / Dahi (Plain Homemade)',
+        'chapati': 'Roti (Plain Whole Wheat Phulka)',
+        'phulka': 'Roti (Plain Whole Wheat Phulka)',
+        'dal': 'Yellow Dal Tadka (Arhar/Toor)'
+      };
+
+      for (const [alias, mappedFood] of Object.entries(aliases)) {
+        if (q.split(/\s+/).includes(alias) || q === alias) {
+          const found = window.indianFoodDatabase.find(f => f.name.toLowerCase().includes(mappedFood.toLowerCase()));
+          if (found) return found;
+        }
+      }
+
+      // 3. Substring fallback search
       return window.indianFoodDatabase.find(f => {
         const fn = f.name.toLowerCase();
-        return q.includes(fn) || fn.includes(q) || 
-          (q.includes('roti') && fn.includes('roti')) ||
-          (q.includes('dal') && fn.includes('dal')) ||
-          (q.includes('rice') && fn.includes('rice')) ||
-          (q.includes('paneer') && fn.includes('paneer')) ||
-          (q.includes('egg') && fn.includes('egg')) ||
-          (q.includes('poha') && fn.includes('poha'));
+        return q.includes(fn) || fn.includes(q);
       });
     }
 

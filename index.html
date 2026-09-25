@@ -383,7 +383,7 @@
           <h1 class="text-xl font-bold text-white flex items-center gap-2">
             <i data-lucide="utensils-crossed" class="w-5 h-5 text-amber-500"></i> Indian Food Library & Custom Dishes
           </h1>
-          <p class="text-xs text-neutral-400 mt-0.5">45+ Indian staples (rotis, dals, paneer, poha, rice, sattu) & custom foods synced to your account.</p>
+          <p class="text-xs text-neutral-400 mt-0.5">1,000+ Indian staples & scientific regional recipes synced to your app.</p>
         </div>
         <button onclick="openCustomFoodModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-xl text-xs transition flex items-center gap-2">
           <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Custom Food
@@ -393,7 +393,7 @@
       <div class="bg-neutral-800/60 p-4 rounded-2xl border border-neutral-800 flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
           <i data-lucide="search" class="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5"></i>
-          <input type="text" id="foodSearchInput" oninput="renderFoodLibrary()" placeholder="Search roti, dal tadka, paneer, khichdi, idli, sattu, chicken..." class="w-full pl-10 pr-4 py-2 bg-neutral-900 border border-neutral-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500" />
+          <input type="text" id="foodSearchInput" oninput="renderFoodLibrary()" placeholder="Search roti, dal, rasam, saag, biryani, paneer, poha, mutton, chicken..." class="w-full pl-10 pr-4 py-2 bg-neutral-900 border border-neutral-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500" />
         </div>
         <button id="filterFavBtn" onclick="toggleFavFilter()" class="px-3.5 py-2 rounded-xl text-xs font-semibold border border-neutral-700 bg-neutral-800 text-neutral-300 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap">
           <i data-lucide="star" class="w-3.5 h-3.5 text-amber-400"></i> Only Favorites
@@ -474,7 +474,7 @@
       <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
         <div>
           <h3 class="font-bold text-base text-white" id="modalMealTitle">Add Food to Meal</h3>
-          <p class="text-xs text-neutral-400">Understands Indian terms (katori, roti, poha, paneer, chawal, sattu).</p>
+          <p class="text-xs text-neutral-400">Search 1000+ Indian dishes or describe natural portions.</p>
         </div>
         <button onclick="closeAddFoodModal()" class="text-neutral-400 hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -484,13 +484,25 @@
       <div class="space-y-3">
         <div>
           <label class="block text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Dish Name / Natural Description</label>
-          <input type="text" id="foodInputDescription" placeholder="e.g. 2 whole wheat rotis with ghee, 1 katori dal tadka, 150g paneer bhurji" class="w-full px-3.5 py-2.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500" />
+          <div class="relative">
+            <input 
+              type="text" 
+              id="foodInputDescription" 
+              oninput="handleFoodInputSuggestions(this.value)" 
+              onfocus="handleFoodInputSuggestions(this.value)" 
+              placeholder="e.g. 2 whole wheat rotis, 150g dal tadka, palak paneer" 
+              autocomplete="off" 
+              class="w-full px-3.5 py-2.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500" 
+            />
+            <!-- Suggestions Dropdown Menu -->
+            <div id="foodSuggestionsDropdown" class="absolute left-0 right-0 top-full mt-1.5 bg-neutral-900 border border-neutral-700/80 rounded-xl shadow-2xl max-h-52 overflow-y-auto hidden z-50 divide-y divide-neutral-800"></div>
+          </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Portion / Custom Weight</label>
-            <input type="text" id="foodInputWeight" placeholder="e.g. 150g, 2 pieces, 1 katori" class="w-full px-3.5 py-2.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500" />
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Portion / Weight (in grams or pieces)</label>
+            <input type="text" id="foodInputWeight" placeholder="e.g. 100g, 150g, 2 pieces, 1 katori" class="w-full px-3.5 py-2.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500" />
           </div>
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Target Meal</label>
@@ -781,8 +793,8 @@
       { id: "f-2", name: "Roti with Desi Ghee", portion: "1 piece (40g)", calories: 120, protein: 3.0, carbs: 17.5, fats: 4.5, favorite: true },
       { id: "f-3", name: "Yellow Dal Tadka (Arhar/Toor)", portion: "1 katori (150g)", calories: 145, protein: 7.5, carbs: 20.0, fats: 4.0, favorite: true },
       { id: "f-4", name: "Moong Dal (Simple Boiled)", portion: "1 katori (150g)", calories: 120, protein: 8.5, carbs: 18.0, fats: 1.5, favorite: false },
-      { id: "f-5", name: "Basmati Steamed Rice", portion: "1 katori (150g cooked)", calories: 195, protein: 4.0, carbs: 43.0, fats: 0.5, favorite: true },
-      { id: "f-6", name: "Brown Rice", portion: "1 katori (150g)", calories: 165, protein: 3.5, carbs: 35.0, fats: 1.2, favorite: false },
+      { id: "f-5", name: "Basmati Steamed Rice (Cooked)", portion: "1 katori (150g cooked)", calories: 195, protein: 4.0, carbs: 43.0, fats: 0.5, favorite: true },
+      { id: "f-6", name: "Brown Rice", portion: "1 katori (150g cooked)", calories: 165, protein: 3.5, carbs: 35.0, fats: 1.2, favorite: false },
       { id: "f-7", name: "Paneer Bhurji", portion: "1 cup (150g)", calories: 285, protein: 16.5, carbs: 6.0, fats: 22.0, favorite: true },
       { id: "f-8", name: "Raw Paneer Cubes", portion: "100g", calories: 295, protein: 18.0, carbs: 3.5, fats: 23.0, favorite: false },
       { id: "f-9", name: "Curd / Dahi (Plain Homemade)", portion: "1 katori (150g)", calories: 95, protein: 5.5, carbs: 6.8, fats: 4.5, favorite: true },
@@ -811,10 +823,12 @@
       { id: "f-32", name: "Roasted Peanuts (Mungfali)", portion: "30g", calories: 175, protein: 7.8, carbs: 5.0, fats: 14.5, favorite: false },
       { id: "f-33", name: "Soya Chunks Curry", portion: "1 bowl (150g)", calories: 185, protein: 18.0, carbs: 14.0, fats: 5.5, favorite: true },
       { id: "f-34", name: "Palak Paneer", portion: "1 bowl (180g)", calories: 260, protein: 13.0, carbs: 8.0, fats: 19.0, favorite: false },
-      { id: "f-35", name: "Bhindi Masala (Okra)", portion: "1 katori (120g)", calories: 110, protein: 2.5, carbs: 11.0, fats: 6.5, favorite: false },
+      { id: "f-35", name: "Bhindi Masala (Okra)", portion: "1 katori (120g)", calories: 110, protein: 2.5, carbs: 11.0, fats: 6.5, favorite: true },
       { id: "f-36", name: "Aloo Gobhi Sabzi", portion: "1 katori (130g)", calories: 135, protein: 3.0, carbs: 18.0, fats: 6.0, favorite: false },
       { id: "f-37", name: "Sprouts Salad (Moong/Chana)", portion: "1 bowl (150g)", calories: 130, protein: 9.0, carbs: 22.0, fats: 0.8, favorite: true },
-      { id: "f-38", name: "Whey Protein in Water", portion: "1 scoop (30g)", calories: 120, protein: 24.0, carbs: 2.0, fats: 1.5, favorite: true }
+      { id: "f-38", name: "Whey Protein in Water", portion: "1 scoop (30g)", calories: 120, protein: 24.0, carbs: 2.0, fats: 1.5, favorite: true },
+      { id: "f-39", name: "Home-style Dry Sabzi (Moderate Oil)", portion: "1 katori (150g)", calories: 120, protein: 2.5, carbs: 12.0, fats: 6.0, favorite: true },
+      { id: "f-40", name: "Home-style Gravy Sabzi / Tari", portion: "1 katori (180g)", calories: 140, protein: 3.0, carbs: 14.0, fats: 7.0, favorite: true }
     ];
 
     window.allDayRecords = JSON.parse(localStorage.getItem('nutritrack_days') || '{}');
@@ -1125,19 +1139,105 @@
       document.getElementById('inputProtein').value = 0;
       document.getElementById('inputCarbs').value = 0;
       document.getElementById('inputFats').value = 0;
+
+      const dropdown = document.getElementById('foodSuggestionsDropdown');
+      if (dropdown) {
+        dropdown.classList.add('hidden');
+        dropdown.innerHTML = '';
+      }
+
       document.getElementById('addFoodModal').classList.remove('hidden');
       if (window.lucide) lucide.createIcons();
     }
 
     function closeAddFoodModal() {
+      const dropdown = document.getElementById('foodSuggestionsDropdown');
+      if (dropdown) dropdown.classList.add('hidden');
       document.getElementById('addFoodModal').classList.add('hidden');
     }
+
+    function handleFoodInputSuggestions(query) {
+      const dropdown = document.getElementById('foodSuggestionsDropdown');
+      const cleanQuery = (query || '').toLowerCase().trim();
+
+      if (!cleanQuery) {
+        dropdown.classList.add('hidden');
+        dropdown.innerHTML = '';
+        return;
+      }
+
+      const matches = window.indianFoodDatabase.filter(food => 
+        food.name.toLowerCase().includes(cleanQuery) || 
+        food.portion.toLowerCase().includes(cleanQuery)
+      ).slice(0, 8);
+
+      if (matches.length === 0) {
+        dropdown.classList.add('hidden');
+        dropdown.innerHTML = '';
+        return;
+      }
+
+      dropdown.innerHTML = matches.map(food => `
+        <div 
+          onclick="selectFoodSuggestion('${food.id}')" 
+          class="p-2.5 hover:bg-neutral-800/90 cursor-pointer flex items-center justify-between transition-colors text-left"
+        >
+          <div class="pr-2">
+            <div class="text-xs font-semibold text-neutral-200">${food.name}</div>
+            <div class="text-[10px] text-neutral-400">${food.portion}</div>
+          </div>
+          <div class="text-right shrink-0">
+            <span class="text-xs font-bold text-amber-400">${food.calories} kcal</span>
+            <span class="text-[10px] text-emerald-400 block">${food.protein}g P</span>
+          </div>
+        </div>
+      `).join('');
+
+      dropdown.classList.remove('hidden');
+    }
+
+    function selectFoodSuggestion(foodId) {
+      const food = window.indianFoodDatabase.find(f => f.id === foodId);
+      if (!food) return;
+
+      document.getElementById('foodInputDescription').value = food.name;
+      document.getElementById('foodInputWeight').value = food.portion || '100g';
+      document.getElementById('inputCalories').value = food.calories;
+      document.getElementById('inputProtein').value = food.protein;
+      document.getElementById('inputCarbs').value = food.carbs;
+      document.getElementById('inputFats').value = food.fats;
+
+      // Automatically rescale if user adjusts gram weight
+      const weightInput = document.getElementById('foodInputWeight');
+      weightInput.oninput = function() {
+        const grams = parseFloat(weightInput.value);
+        if (!isNaN(grams) && grams > 0 && food.portion.includes('100g')) {
+          const ratio = grams / 100;
+          document.getElementById('inputCalories').value = Math.round(food.calories * ratio);
+          document.getElementById('inputProtein').value = (food.protein * ratio).toFixed(1);
+          document.getElementById('inputCarbs').value = (food.carbs * ratio).toFixed(1);
+          document.getElementById('inputFats').value = (food.fats * ratio).toFixed(1);
+        }
+      };
+
+      const dropdown = document.getElementById('foodSuggestionsDropdown');
+      dropdown.classList.add('hidden');
+      dropdown.innerHTML = '';
+    }
+
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('foodSuggestionsDropdown');
+      const input = document.getElementById('foodInputDescription');
+      if (dropdown && input && !input.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
 
     async function analyzeFoodSmart() {
       const query = document.getElementById('foodInputDescription').value.trim();
       const customWeight = document.getElementById('foodInputWeight').value.trim();
       if (!query) {
-        showCustomAlert("Please enter a food description (e.g. 2 rotis with ghee, 1 katori dal).");
+        showCustomAlert("Please enter a food description (e.g. 2 rotis with ghee, 150g dal).");
         return;
       }
 
@@ -1150,7 +1250,7 @@
       if (window.APP_STATE && window.APP_STATE.aiModel) {
         try {
           const portionStr = customWeight || '1 standard serving';
-const prompt = `You are an expert Indian Clinical Dietitian referencing ICMR-NIN standards.
+          const prompt = `You are an expert Indian Clinical Dietitian referencing ICMR-NIN standards.
 Food Item: "${query}"
 Specified Portion/Quantity: "${portionStr}"
 
@@ -1222,20 +1322,18 @@ Return ONLY valid JSON (no markdown backticks, no text explanations):
       if (window.lucide) lucide.createIcons();
     }
 
-function findOfflineIndianFood(text) {
+    function findOfflineIndianFood(text) {
       const q = text.toLowerCase().trim();
 
-      // 1. Direct match check
       const exact = window.indianFoodDatabase.find(f => f.name.toLowerCase() === q || q.includes(f.name.toLowerCase()));
       if (exact) return exact;
 
-      // 2. Common Indian synonym map
       const aliases = {
-        'rice': 'Basmati Steamed Rice',
-        'chawal': 'Basmati Steamed Rice',
-        'bhat': 'Basmati Steamed Rice',
-        'plain rice': 'Basmati Steamed Rice',
-        'white rice': 'Basmati Steamed Rice',
+        'rice': 'Basmati Steamed Rice (Cooked)',
+        'chawal': 'Basmati Steamed Rice (Cooked)',
+        'bhat': 'Basmati Steamed Rice (Cooked)',
+        'plain rice': 'Basmati Steamed Rice (Cooked)',
+        'white rice': 'Basmati Steamed Rice (Cooked)',
         'sabji': 'Bhindi Masala (Okra)',
         'sabzi': 'Bhindi Masala (Okra)',
         'tari': 'Chicken Curry (Home-style)',
@@ -1253,7 +1351,6 @@ function findOfflineIndianFood(text) {
         }
       }
 
-      // 3. Substring fallback search
       return window.indianFoodDatabase.find(f => {
         const fn = f.name.toLowerCase();
         return q.includes(fn) || fn.includes(q);
@@ -1321,12 +1418,15 @@ function findOfflineIndianFood(text) {
         list = list.filter(f => f.name.toLowerCase().includes(search) || f.portion.toLowerCase().includes(search));
       }
 
-      if (list.length === 0) {
+      // Performance: Show top 60 in the grid view if list is massive
+      const displayList = list.slice(0, 60);
+
+      if (displayList.length === 0) {
         grid.innerHTML = `<p class="col-span-full py-8 text-center text-xs text-neutral-400">No dishes match your filter.</p>`;
         return;
       }
 
-      list.forEach(food => {
+      displayList.forEach(food => {
         const card = document.createElement('div');
         card.className = "p-4 bg-neutral-800/60 rounded-2xl border border-neutral-800 hover:border-neutral-700 flex flex-col justify-between transition";
         card.innerHTML = `
@@ -1639,6 +1739,31 @@ Return STRICT JSON without markdown backticks:
       }, 3200);
     }
 
+    async function loadProcessedFoodDatabase() {
+      try {
+        const res = await fetch('indian_foods.json');
+        if (!res.ok) return;
+        const foodList = await res.json();
+
+        const existingNames = new Set(window.indianFoodDatabase.map(f => f.name.toLowerCase()));
+        let added = 0;
+
+        foodList.forEach(item => {
+          if (!existingNames.has(item.name.toLowerCase())) {
+            window.indianFoodDatabase.push(item);
+            existingNames.add(item.name.toLowerCase());
+            added++;
+          }
+        });
+
+        if (added > 0) {
+          renderFoodLibrary();
+        }
+      } catch (e) {
+        console.warn("External Indian foods database not found or offline:", e);
+      }
+    }
+
     window.addEventListener('load', () => {
       const savedTheme = localStorage.getItem('nutritrack_theme') || 'dark';
       if (savedTheme === 'light') {
@@ -1647,6 +1772,7 @@ Return STRICT JSON without markdown backticks:
         document.documentElement.classList.add('dark');
       }
 
+      loadProcessedFoodDatabase();
       switchTab('calendar');
       renderCurrentDayDiary();
       if (window.lucide) lucide.createIcons();

@@ -76,9 +76,8 @@
         </button>
       </nav>
 
-      <!-- Action items: Google Auth User Pill, Gemini Key, Theme Toggle -->
+      <!-- Action items: Google Auth User Pill & Theme Toggle -->
       <div class="flex items-center space-x-2 shrink-0">
-        <!-- Firebase Google Auth User Pill -->
         <div id="firebaseAuthContainer" class="flex items-center">
           <button onclick="handleAuthAction()" id="authMainBtn" class="px-3 py-1.5 rounded-xl border border-neutral-700 bg-neutral-800/90 hover:bg-neutral-700 text-xs font-medium flex items-center gap-2 transition">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" id="syncDot"></span>
@@ -86,13 +85,6 @@
           </button>
         </div>
 
-        <!-- Gemini API Key Button -->
-        <button onclick="openApiKeyModal()" id="apiKeyBadgeBtn" class="px-2.5 py-1.5 rounded-xl border border-neutral-700 bg-neutral-800/80 hover:bg-neutral-700 text-xs font-medium text-amber-400 flex items-center gap-1.5 transition" title="Gemini AI Configuration">
-          <i data-lucide="key" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline" id="apiKeyStatusLabel">Gemini AI</span>
-        </button>
-
-        <!-- Light/Dark Mode Switcher -->
         <button onclick="toggleTheme()" class="p-2 rounded-xl border border-neutral-700 hover:bg-neutral-800 transition text-neutral-300" title="Toggle Theme">
           <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
           <i data-lucide="moon" class="w-4 h-4 block dark:hidden text-neutral-600"></i>
@@ -142,7 +134,6 @@
         </div>
       </div>
 
-      <!-- Month Grid -->
       <div class="bg-neutral-800/50 rounded-2xl border border-neutral-800 shadow-sm overflow-hidden p-3 sm:p-5">
         <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
           <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
@@ -150,7 +141,6 @@
         <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 sm:gap-2"></div>
       </div>
 
-      <!-- Monthly Summary Metrics -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-neutral-800/60 p-4 rounded-2xl border border-neutral-800">
           <span class="text-xs font-medium text-neutral-400">Days Logged This Month</span>
@@ -167,10 +157,8 @@
       </div>
     </section>
 
-    <!-- 2. DAILY DIARY VIEW (4 SECTIONS + WEIGHT) -->
+    <!-- 2. DAILY DIARY VIEW -->
     <section id="tab-diary" class="tab-pane hidden space-y-6">
-      
-      <!-- Date Navigator & Weight Tracker Bar -->
       <div class="bg-neutral-800/60 p-5 rounded-2xl border border-neutral-800 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div class="flex items-center space-x-3">
           <button onclick="navigateDay(-1)" class="p-2 rounded-xl border border-neutral-700 hover:bg-neutral-700 transition">
@@ -185,7 +173,6 @@
           </button>
         </div>
 
-        <!-- Body Weight input for specific date -->
         <div class="flex items-center gap-3 bg-neutral-900/80 px-4 py-2 rounded-xl border border-neutral-700/60">
           <div class="flex items-center gap-1.5 text-neutral-300 text-xs font-semibold">
             <i data-lucide="scale" class="w-4 h-4 text-amber-500"></i> Weight for this day:
@@ -198,7 +185,6 @@
         </div>
       </div>
 
-      <!-- Macro Summary Cards with Visual Indicators -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div class="bg-neutral-800/60 p-4 rounded-2xl border border-neutral-800">
           <div class="flex items-center justify-between text-neutral-400 text-xs">
@@ -245,9 +231,8 @@
         </div>
       </div>
 
-      <!-- 4 Meal Blocks: Breakfast, Lunch, Snacks, Dinner -->
+      <!-- 4 Meal Blocks -->
       <div class="space-y-4">
-        <!-- Breakfast -->
         <div class="meal-block bg-neutral-800/60 rounded-2xl border border-neutral-800 p-4 sm:p-5" data-meal="Breakfast">
           <div class="flex items-center justify-between pb-3 border-b border-neutral-700/60">
             <div class="flex items-center space-x-2.5">
@@ -266,7 +251,6 @@
           <div class="divide-y divide-neutral-700/40 mt-2 meal-food-list" id="list-Breakfast"></div>
         </div>
 
-        <!-- Lunch -->
         <div class="meal-block bg-neutral-800/60 rounded-2xl border border-neutral-800 p-4 sm:p-5" data-meal="Lunch">
           <div class="flex items-center justify-between pb-3 border-b border-neutral-700/60">
             <div class="flex items-center space-x-2.5">
@@ -285,7 +269,6 @@
           <div class="divide-y divide-neutral-700/40 mt-2 meal-food-list" id="list-Lunch"></div>
         </div>
 
-        <!-- Snacks & Chai -->
         <div class="meal-block bg-neutral-800/60 rounded-2xl border border-neutral-800 p-4 sm:p-5" data-meal="Snacks">
           <div class="flex items-center justify-between pb-3 border-b border-neutral-700/60">
             <div class="flex items-center space-x-2.5">
@@ -304,7 +287,6 @@
           <div class="divide-y divide-neutral-700/40 mt-2 meal-food-list" id="list-Snacks"></div>
         </div>
 
-        <!-- Dinner -->
         <div class="meal-block bg-neutral-800/60 rounded-2xl border border-neutral-800 p-4 sm:p-5" data-meal="Dinner">
           <div class="flex items-center justify-between pb-3 border-b border-neutral-700/60">
             <div class="flex items-center space-x-2.5">
@@ -324,7 +306,6 @@
         </div>
       </div>
 
-      <!-- Quick AI Evaluation Prompt banner -->
       <div class="p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-transparent border border-amber-500/20 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
           <h3 class="font-bold text-white flex items-center gap-2">
@@ -338,7 +319,7 @@
       </div>
     </section>
 
-    <!-- 3. INDIAN FOOD LIBRARY & CUSTOM FOODS -->
+    <!-- 3. INDIAN FOOD LIBRARY -->
     <section id="tab-foods" class="tab-pane hidden space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-800/60 p-5 rounded-2xl border border-neutral-800">
         <div>
@@ -352,7 +333,6 @@
         </button>
       </div>
 
-      <!-- Search & Filters -->
       <div class="bg-neutral-800/60 p-4 rounded-2xl border border-neutral-800 flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
           <i data-lucide="search" class="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5"></i>
@@ -363,7 +343,6 @@
         </button>
       </div>
 
-      <!-- Food Grid -->
       <div id="foodLibraryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
@@ -381,9 +360,7 @@
         </button>
       </div>
 
-      <!-- Results Container -->
       <div id="reviewContainer">
-        <!-- Empty State -->
         <div id="reviewEmptyState" class="bg-neutral-800/50 p-12 rounded-2xl border border-neutral-800 text-center">
           <div class="w-12 h-12 mx-auto rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 mb-3">
             <i data-lucide="bot" class="w-6 h-6"></i>
@@ -393,7 +370,6 @@
           <button onclick="generateDailyReview()" class="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-xl transition">Analyze Today's Meals</button>
         </div>
 
-        <!-- Loading State -->
         <div id="reviewLoadingState" class="hidden bg-neutral-800/50 p-12 rounded-2xl border border-neutral-800 text-center space-y-4">
           <div class="inline-block animate-spin text-amber-500">
             <i data-lucide="loader-2" class="w-8 h-8"></i>
@@ -404,10 +380,8 @@
           </div>
         </div>
 
-        <!-- Rendered Analysis Content -->
         <div id="reviewContentArea" class="hidden space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- What Went Well -->
             <div class="bg-neutral-800/60 p-5 rounded-2xl border border-emerald-500/20">
               <div class="flex items-center gap-2 text-emerald-400 font-bold mb-3 text-sm">
                 <i data-lucide="check-circle-2" class="w-4 h-4"></i>
@@ -416,7 +390,6 @@
               <ul id="reviewGoodList" class="space-y-2 text-xs text-neutral-300"></ul>
             </div>
 
-            <!-- What Was Wrong / Need Improvement -->
             <div class="bg-neutral-800/60 p-5 rounded-2xl border border-rose-500/20">
               <div class="flex items-center gap-2 text-rose-400 font-bold mb-3 text-sm">
                 <i data-lucide="alert-triangle" class="w-4 h-4"></i>
@@ -426,7 +399,6 @@
             </div>
           </div>
 
-          <!-- Actionable Indian Recommendations -->
           <div class="bg-neutral-800/60 p-5 rounded-2xl border border-amber-500/20">
             <div class="flex items-center gap-2 text-amber-400 font-bold mb-3 text-sm">
               <i data-lucide="lightbulb" class="w-4 h-4"></i>
@@ -475,7 +447,7 @@
         </div>
 
         <button type="button" onclick="analyzeFoodSmart()" id="btnAnalyzeFood" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-sm transition">
-          <i data-lucide="sparkles" class="w-4 h-4"></i> Calculate Nutrition (Gemini AI & Fallback)
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Calculate Nutrition (Gemini AI)
         </button>
 
         <div class="pt-2 border-t border-neutral-800">
@@ -554,6 +526,7 @@
     </div>
   </div>
 
+  <!-- FIREBASE, APP CHECK & FIRESTORE SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
     import { 
@@ -569,55 +542,61 @@
       setDoc, 
       collection, 
       onSnapshot 
-} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    import { 
+      initializeAppCheck, 
+      ReCaptchaV3Provider 
+    } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app-check.js";
+    import { 
+      getVertexAI, 
+      getGenerativeModel 
+    } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-vertexai.js";
 
-// Add App Check & Firebase AI Logic (version 11+)
-import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app-check.js";
-import { getAI, getGenerativeModel } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-ai.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1FJDUdT1KTfOaS_Lx4qm7FbatDysunio",
+      authDomain: "nutrition-tracker-862e0.firebaseapp.com",
+      projectId: "nutrition-tracker-862e0",
+      storageBucket: "nutrition-tracker-862e0.firebasestorage.app",
+      messagingSenderId: "924840001129",
+      appId: "1:924840001129:web:fd38d3920f771859d92cf8",
+      measurementId: "G-8MN4MC03CY"
+    };
 
-// Global App State
-window.APP_STATE = {
-  user: null,
-  auth: null,
-  db: null,
-  aiModel: null
-};
+    window.APP_STATE = {
+      user: null,
+      auth: null,
+      db: null,
+      aiModel: null
+    };
 
-try {
-  // 1. Initialize Firebase App (ONCE)
-  const app = initializeApp(firebaseConfig);
+    try {
+      const app = initializeApp(firebaseConfig);
 
-  // 2. Initialize App Check with your reCAPTCHA site key
-  const appCheck = initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider('6Leb180tAAAAAC_ChkUvM2yzVapy7BqApAa-ZhYd'),
-    isTokenAutoRefreshEnabled: true
-  });
+      // App Check with reCAPTCHA v3
+      initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider('6Leb180tAAAAAC_ChkUvM2yzVapy7BqApAa-ZhYd'),
+        isTokenAutoRefreshEnabled: true
+      });
 
-  // 3. Initialize Firebase AI Logic
-  const ai = getAI(app);
-  window.APP_STATE.aiModel = getGenerativeModel(ai, { model: "gemini-1.5-flash" });
+      // Firebase Vertex AI
+      const vertexAI = getVertexAI(app);
+      window.APP_STATE.aiModel = getGenerativeModel(vertexAI, { model: "gemini-1.5-flash" });
 
-  // 4. Attach Auth & Firestore to APP_STATE
-  window.APP_STATE.auth = getAuth(app);
-  window.APP_STATE.db = getFirestore(app);
+      window.APP_STATE.auth = getAuth(app);
+      window.APP_STATE.db = getFirestore(app);
 
-} catch (err) {
-  console.error("Initialization error:", err);
-}
-       onAuthStateChanged(window.APP_STATE.auth, (user) => {
-  if (user) {
-    // User is logged in
-    window.APP_STATE.user = user;
-    console.log("Logged in as:", user.displayName);
-    // update your UI, load user meals from Firestore, etc.
-  } else {
-    // User is logged out
-    window.APP_STATE.user = null;
-    // update UI for logged-out state
-  }
-});
-    } catch (e) {
-      console.warn("Firebase Init Notice:", e);
+      onAuthStateChanged(window.APP_STATE.auth, (user) => {
+        if (user) {
+          window.APP_STATE.user = user;
+          updateUserAuthUI(user);
+          startCloudSync(user.uid);
+        } else {
+          window.APP_STATE.user = null;
+          updateUserAuthUI(null);
+        }
+      });
+    } catch (err) {
+      console.warn("Firebase Init / AppCheck warning:", err);
     }
 
     function updateUserAuthUI(user) {
@@ -643,7 +622,6 @@ try {
 
     window.handleAuthAction = async function() {
       if (window.APP_STATE.user) {
-        // Confirm sign out gracefully without window.confirm
         await signOut(window.APP_STATE.auth);
         showCustomAlert("Signed out. Using local browser storage.");
       } else {
@@ -658,12 +636,10 @@ try {
       }
     };
 
-    // Firestore Bidirectional Realtime Sync
     function startCloudSync(uid) {
       if (!window.APP_STATE.db) return;
       const appId = "nutrition-tracker-862e0";
 
-      // 1. Daily Meal Logs Sync
       const logsCol = collection(window.APP_STATE.db, 'artifacts', appId, 'users', uid, 'dailyLogs');
       onSnapshot(logsCol, (snap) => {
         snap.forEach(docSnap => {
@@ -676,7 +652,6 @@ try {
         renderCalendar();
       }, err => console.debug("Sync log stream:", err));
 
-      // 2. Weights Sync
       const weightsCol = collection(window.APP_STATE.db, 'artifacts', appId, 'users', uid, 'weights');
       onSnapshot(weightsCol, (snap) => {
         snap.forEach(docSnap => {
@@ -689,7 +664,6 @@ try {
         renderCalendar();
       }, err => console.debug("Sync weight stream:", err));
 
-      // 3. Custom Foods Sync
       const foodsCol = collection(window.APP_STATE.db, 'artifacts', appId, 'users', uid, 'customFoods');
       onSnapshot(foodsCol, (snap) => {
         snap.forEach(docSnap => {
@@ -708,7 +682,6 @@ try {
       }, err => console.debug("Sync foods stream:", err));
     }
 
-    // Cloud push methods
     window.cloudSaveDay = async function(dateStr, data) {
       if (!window.APP_STATE.user || !window.APP_STATE.db) return;
       try {
@@ -744,6 +717,7 @@ try {
     };
   </script>
 
+  <!-- APPLICATION LOGIC -->
   <script>
     const DEFAULT_INDIAN_FOODS = [
       { id: "f-1", name: "Roti (Plain Whole Wheat Phulka)", portion: "1 piece (35g)", calories: 85, protein: 3.0, carbs: 17.5, fats: 0.5, favorite: true },
@@ -1013,7 +987,7 @@ try {
       if (window.cloudSaveWeight) {
         window.cloudSaveWeight(window.currentSelectedDateStr, val || null);
       }
-      showCustomAlert(`Weight for ${window.currentSelectedDateStr} saved: ${val || 0} kg`);
+      showCustomAlert(`Weight saved: ${val || 0} kg`);
       renderCalendar();
     }
 
@@ -1061,12 +1035,11 @@ try {
       btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Calculating...`;
       btn.disabled = true;
 
-      const apiKey = localStorage.getItem('nutritrack_gemini_api_key') || "";
-
-      if (apiKey) {
+      // Primary AI Engine: Firebase Vertex AI
+      if (window.APP_STATE && window.APP_STATE.aiModel) {
         try {
           const prompt = `You are an expert Indian dietitian. Calculate the nutritional profile for: "${query}" ${customWeight ? `with portion: ${customWeight}` : ''}.
-Return strict JSON with schema:
+Return strict JSON without markdown backticks:
 {
   "foodName": "Standardized Indian Dish Name",
   "portion": "e.g. 2 pieces (70g)",
@@ -1075,18 +1048,9 @@ Return strict JSON with schema:
   "carbs": number,
   "fats": number
 }`;
-          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { responseMimeType: "application/json" }
-            })
-          });
-
-          const data = await response.json();
-          const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
+          const res = await window.APP_STATE.aiModel.generateContent(prompt);
+          const rawText = res.response.text().trim().replace(/^```json/, '').replace(/```$/, '');
+          const parsed = JSON.parse(rawText);
 
           document.getElementById('foodInputDescription').value = parsed.foodName || query;
           document.getElementById('foodInputWeight').value = parsed.portion || customWeight || '1 serving';
@@ -1100,11 +1064,11 @@ Return strict JSON with schema:
           if (window.lucide) lucide.createIcons();
           return;
         } catch (err) {
-          console.warn("Gemini call fell back to local Indian database:", err);
+          console.warn("Firebase Vertex AI error, falling back to local dataset:", err);
         }
       }
 
-      // Offline Indian Fallback Database search & multiplier
+      // Offline Indian Fallback Search
       const match = findOfflineIndianFood(query);
       let multiplier = 1;
 
@@ -1381,50 +1345,41 @@ Return strict JSON with schema:
       document.getElementById('reviewContentArea').classList.add('hidden');
       document.getElementById('reviewLoadingState').classList.remove('hidden');
 
-      const apiKey = localStorage.getItem('nutritrack_gemini_api_key') || "";
       const currentWeight = window.bodyWeights[dateStr] || "Not logged";
 
-      if (apiKey) {
+      // 1. Primary AI Diagnosis via Firebase Vertex AI
+      if (window.APP_STATE && window.APP_STATE.aiModel) {
         try {
           const prompt = `Act as an expert Indian Dietitian & Clinical Nutritionist.
 Evaluate this daily Indian food log for date ${dateStr} (User Weight: ${currentWeight} kg):
 ${JSON.stringify(dayRecord, null, 2)}
 
 Provide an honest diagnosis adhering strictly to Indian dietary contexts:
-1. What went well (e.g. good home cooking, lentils, hydration, portion discipline).
-2. What was wrong or needs improvement (e.g. carb dominance, low protein density, heavy refined oils/ghee, sugar in tea).
+1. What went well (e.g. lentils, hydration, portion discipline).
+2. What was wrong or needs improvement (e.g. carb dominance, low protein density, heavy refined oils/ghee).
 3. Actionable Indian recommendations (realistic swaps like adding paneer, sattu, boiled eggs, curd, sprouts, less white rice).
 
-Return STRICT JSON:
+Return STRICT JSON without markdown backticks:
 {
   "goodPoints": ["point 1", "point 2"],
   "badPoints": ["concern 1", "concern 2"],
   "recommendations": ["recommendation 1", "recommendation 2"]
 }`;
 
-          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { responseMimeType: "application/json" }
-            })
-          });
-
-          const data = await response.json();
-          const reviewObj = JSON.parse(data.candidates[0].content.parts[0].text);
+          const res = await window.APP_STATE.aiModel.generateContent(prompt);
+          const rawText = res.response.text().trim().replace(/^```json/, '').replace(/```$/, '');
+          const reviewObj = JSON.parse(rawText);
 
           window.dayReviews[dateStr] = reviewObj;
           localStorage.setItem('nutritrack_reviews', JSON.stringify(window.dayReviews));
           renderReviewView();
           return;
         } catch (err) {
-          console.warn("AI diagnosis fell back to rules engine:", err);
+          console.warn("AI diagnosis falling back to rules engine:", err);
         }
       }
 
-      // Offline Indian Dietetic Diagnostic Rules Engine
+      // 2. Offline Indian Dietetic Diagnostic Rules Engine
       let totalCal = 0, totalPro = 0, totalCarb = 0, totalFat = 0;
       ['Breakfast', 'Lunch', 'Snacks', 'Dinner'].forEach(m => {
         (dayRecord[m] || []).forEach(i => {
@@ -1454,7 +1409,7 @@ Return STRICT JSON:
       }
 
       if (totalCarb > 250) {
-        bad.push(`Excessive simple carbohydrates (${Math.round(totalCarb)}g). Large portions of white rice and wheat rotis can cause blood sugar spikes.`);
+        bad.push(`Excessive carbohydrates (${Math.round(totalCarb)}g). Large portions of white rice and wheat rotis can cause blood sugar spikes.`);
         recs.push(`Replace half of your rice with a katori of salad or increase dal/sabzi portion to lower glycemic response.`);
       } else {
         good.push(`Controlled carbohydrate balance (${Math.round(totalCarb)}g).`);
@@ -1495,36 +1450,6 @@ Return STRICT JSON:
       if (window.lucide) lucide.createIcons();
     }
 
-    function openApiKeyModal() {
-      document.getElementById('geminiApiKeyInput').value = localStorage.getItem('nutritrack_gemini_api_key') || "";
-      document.getElementById('apiKeyModal').classList.remove('hidden');
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function closeApiKeyModal() {
-      document.getElementById('apiKeyModal').classList.add('hidden');
-    }
-
-    function saveApiKey() {
-      const key = document.getElementById('geminiApiKeyInput').value.trim();
-      if (key) {
-        localStorage.setItem('nutritrack_gemini_api_key', key);
-        document.getElementById('apiKeyStatusLabel').textContent = "AI Active";
-        showCustomAlert("Gemini API Key saved permanently in your browser.");
-      } else {
-        localStorage.removeItem('nutritrack_gemini_api_key');
-        document.getElementById('apiKeyStatusLabel').textContent = "Gemini AI";
-      }
-      closeApiKeyModal();
-    }
-
-    function clearApiKey() {
-      localStorage.removeItem('nutritrack_gemini_api_key');
-      document.getElementById('apiKeyStatusLabel').textContent = "Gemini AI";
-      closeApiKeyModal();
-      showCustomAlert("API Key removed. Switched to offline database.");
-    }
-
     function toggleTheme() {
       const html = document.documentElement;
       if (html.classList.contains('dark')) {
@@ -1555,11 +1480,6 @@ Return STRICT JSON:
         document.documentElement.classList.remove('dark');
       } else {
         document.documentElement.classList.add('dark');
-      }
-
-      if (localStorage.getItem('nutritrack_gemini_api_key')) {
-        const badge = document.getElementById('apiKeyStatusLabel');
-        if (badge) badge.textContent = "AI Active";
       }
 
       switchTab('calendar');

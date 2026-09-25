@@ -554,79 +554,68 @@
     </div>
   </div>
 
-  <!-- MODAL: GEMINI API KEY -->
-  <div id="apiKeyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
-    <div class="bg-neutral-900 rounded-2xl border border-neutral-700 shadow-2xl max-w-md w-full p-6 space-y-4">
-      <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
-        <div class="flex items-center gap-2">
-          <i data-lucide="sparkles" class="w-5 h-5 text-amber-500"></i>
-          <h3 class="font-bold text-base text-white">Gemini API Key</h3>
-        </div>
-        <button onclick="closeApiKeyModal()" class="text-neutral-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-      <p class="text-xs text-neutral-400">Stored permanently in your browser. The app also includes a 45+ item offline Indian food database if you choose not to add one.</p>
-      <div>
-        <label class="block text-[11px] font-bold text-neutral-400 mb-1">Gemini API Key</label>
-        <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500" />
-      </div>
-      <div class="flex justify-between items-center pt-2">
-        <button onclick="clearApiKey()" class="text-xs text-rose-400 hover:underline">Remove Key</button>
-        <div class="flex gap-2">
-          <button onclick="closeApiKeyModal()" class="px-3 py-1.5 text-xs text-neutral-400 hover:text-white">Cancel</button>
-          <button onclick="saveApiKey()" class="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-xl">Save Key</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
     import { 
       getAuth, 
       GoogleAuthProvider, 
       signInWithPopup, 
       signOut, 
       onAuthStateChanged 
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
     import { 
       getFirestore, 
       doc, 
       setDoc, 
       collection, 
       onSnapshot 
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-    // Embedded User Firebase Project Configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyB1FJDUdT1KTfOaS_Lx4qm7FbatDysunio",
-      authDomain: "nutrition-tracker-862e0.firebaseapp.com",
-      projectId: "nutrition-tracker-862e0",
-      storageBucket: "nutrition-tracker-862e0.firebasestorage.app",
-      messagingSenderId: "924840001129",
-      appId: "1:924840001129:web:fd38d3920f771859d92cf8",
-      measurementId: "G-8MN4MC03CY"
-    };
+// Add App Check & Firebase AI Logic (version 11+)
+import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app-check.js";
+import { getAI, getGenerativeModel } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-ai.js";
 
-    window.APP_STATE = {
-      user: null,
-      auth: null,
-      db: null
-    };
+// Global App State
+window.APP_STATE = {
+  user: null,
+  auth: null,
+  db: null,
+  aiModel: null
+};
 
-    try {
-      const app = initializeApp(firebaseConfig);
-      window.APP_STATE.auth = getAuth(app);
-      window.APP_STATE.db = getFirestore(app);
+try {
+  // 1. Initialize Firebase App (ONCE)
+  const app = initializeApp(firebaseConfig);
 
-      onAuthStateChanged(window.APP_STATE.auth, (user) => {
-        window.APP_STATE.user = user;
-        updateUserAuthUI(user);
-        if (user) {
-          startCloudSync(user.uid);
-        }
-      });
+  // 2. Initialize App Check with your reCAPTCHA site key
+  const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider('6Leb180tAAAAAC_ChkUvM2yzVapy7BqApAa-ZhYd'),
+    isTokenAutoRefreshEnabled: true
+  });
+
+  // 3. Initialize Firebase AI Logic
+  const ai = getAI(app);
+  window.APP_STATE.aiModel = getGenerativeModel(ai, { model: "gemini-1.5-flash" });
+
+  // 4. Attach Auth & Firestore to APP_STATE
+  window.APP_STATE.auth = getAuth(app);
+  window.APP_STATE.db = getFirestore(app);
+
+} catch (err) {
+  console.error("Initialization error:", err);
+}
+       onAuthStateChanged(window.APP_STATE.auth, (user) => {
+  if (user) {
+    // User is logged in
+    window.APP_STATE.user = user;
+    console.log("Logged in as:", user.displayName);
+    // update your UI, load user meals from Firestore, etc.
+  } else {
+    // User is logged out
+    window.APP_STATE.user = null;
+    // update UI for logged-out state
+  }
+});
     } catch (e) {
       console.warn("Firebase Init Notice:", e);
     }

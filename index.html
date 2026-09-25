@@ -47,8 +47,8 @@
 
     /* --- LIGHT MODE DYNAMIC OVERRIDES --- */
     html:not(.dark) body {
-      background-color: #f8fafc !important; /* Slate 50 */
-      color: #0f172a !important;            /* Slate 900 */
+      background-color: #f8fafc !important;
+      color: #0f172a !important;
     }
     html:not(.dark) header {
       background-color: rgba(255, 255, 255, 0.9) !important;
@@ -59,7 +59,7 @@
     html:not(.dark) .bg-neutral-900\/80,
     html:not(.dark) .bg-neutral-900\/60,
     html:not(.dark) .bg-neutral-900\/30 {
-      background-color: #f1f5f9 !important; /* Slate 100 */
+      background-color: #f1f5f9 !important;
       border-color: #cbd5e1 !important;
     }
     html:not(.dark) .bg-neutral-800,
@@ -68,7 +68,7 @@
     html:not(.dark) .bg-neutral-800\/60,
     html:not(.dark) .bg-neutral-800\/50,
     html:not(.dark) .bg-neutral-800\/40 {
-      background-color: #ffffff !important; /* Crisp white cards */
+      background-color: #ffffff !important;
       border-color: #e2e8f0 !important;
     }
     html:not(.dark) .bg-neutral-700,
@@ -85,11 +85,11 @@
     html:not(.dark) .text-white,
     html:not(.dark) .text-neutral-100,
     html:not(.dark) .text-neutral-200 {
-      color: #0f172a !important; /* Dark text for readability */
+      color: #0f172a !important;
     }
     html:not(.dark) .text-neutral-300,
     html:not(.dark) .text-neutral-400 {
-      color: #64748b !important; /* Muted slate text */
+      color: #64748b !important;
     }
     html:not(.dark) input,
     html:not(.dark) select {
@@ -383,7 +383,7 @@
           <h1 class="text-xl font-bold text-white flex items-center gap-2">
             <i data-lucide="utensils-crossed" class="w-5 h-5 text-amber-500"></i> Indian Food Library & Custom Dishes
           </h1>
-          <p class="text-xs text-neutral-400 mt-0.5">1,000+ Indian staples & scientific regional recipes synced to your app.</p>
+          <p class="text-xs text-neutral-400 mt-0.5">1,000+ Indian staples & regional dishes synced to your app.</p>
         </div>
         <button onclick="openCustomFoodModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-xl text-xs transition flex items-center gap-2">
           <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Custom Food
@@ -1168,7 +1168,7 @@
 
       const matches = window.indianFoodDatabase.filter(food => 
         food.name.toLowerCase().includes(cleanQuery) || 
-        food.portion.toLowerCase().includes(cleanQuery)
+        (food.portion && food.portion.toLowerCase().includes(cleanQuery))
       ).slice(0, 8);
 
       if (matches.length === 0) {
@@ -1184,7 +1184,7 @@
         >
           <div class="pr-2">
             <div class="text-xs font-semibold text-neutral-200">${food.name}</div>
-            <div class="text-[10px] text-neutral-400">${food.portion}</div>
+            <div class="text-[10px] text-neutral-400">${food.portion || '100g'}</div>
           </div>
           <div class="text-right shrink-0">
             <span class="text-xs font-bold text-amber-400">${food.calories} kcal</span>
@@ -1211,7 +1211,7 @@
       const weightInput = document.getElementById('foodInputWeight');
       weightInput.oninput = function() {
         const grams = parseFloat(weightInput.value);
-        if (!isNaN(grams) && grams > 0 && food.portion.includes('100g')) {
+        if (!isNaN(grams) && grams > 0 && (food.portion || '').includes('100g')) {
           const ratio = grams / 100;
           document.getElementById('inputCalories').value = Math.round(food.calories * ratio);
           document.getElementById('inputProtein').value = (food.protein * ratio).toFixed(1);
@@ -1415,10 +1415,10 @@ Return ONLY valid JSON (no markdown backticks, no text explanations):
         list = list.filter(f => f.favorite);
       }
       if (search) {
-        list = list.filter(f => f.name.toLowerCase().includes(search) || f.portion.toLowerCase().includes(search));
+        list = list.filter(f => f.name.toLowerCase().includes(search) || (f.portion && f.portion.toLowerCase().includes(search)));
       }
 
-      // Performance: Show top 60 in the grid view if list is massive
+      // Performance optimization: Render top 60 cards
       const displayList = list.slice(0, 60);
 
       if (displayList.length === 0) {
@@ -1437,7 +1437,7 @@ Return ONLY valid JSON (no markdown backticks, no text explanations):
                 <i data-lucide="star" class="w-4 h-4 ${food.favorite ? 'text-amber-400 fill-amber-400' : ''}"></i>
               </button>
             </div>
-            <p class="text-[11px] text-neutral-400 mt-0.5">${food.portion}</p>
+            <p class="text-[11px] text-neutral-400 mt-0.5">${food.portion || '100g'}</p>
             <div class="mt-3 grid grid-cols-4 gap-1 text-center py-2 bg-neutral-900/60 rounded-xl text-xs font-semibold">
               <div>
                 <span class="text-[10px] text-neutral-400 block">Kcal</span>
@@ -1513,7 +1513,7 @@ Return ONLY valid JSON (no markdown backticks, no text explanations):
 
       window.allDayRecords[dateStr][targetMeal].push({
         name: food.name,
-        portion: food.portion,
+        portion: food.portion || '100g',
         calories: food.calories,
         protein: food.protein,
         carbs: food.carbs,
@@ -1523,11 +1523,13 @@ Return ONLY valid JSON (no markdown backticks, no text explanations):
         baseProtein: food.protein,
         baseCarbs: food.carbs,
         baseFats: food.fats,
-        timestamp: Date.now()
+        timestamp: Date.now() 
       });
 
       localStorage.setItem('nutritrack_days', JSON.stringify(window.allDayRecords));
-      if (window.cloudSaveDay) window.cloudSaveDay(dateStr, window.allDayRecords[dateStr]);
+      if (window.cloudSaveDay) {
+        window.cloudSaveDay(dateStr, window.allDayRecords[dateStr]);
+      }
       showCustomAlert(`Added "${food.name}" to ${targetMeal}!`);
     }
 
@@ -1739,28 +1741,52 @@ Return STRICT JSON without markdown backticks:
       }, 3200);
     }
 
+    // Direct parser for Indian_Food_Nutrition_Processed.csv
     async function loadProcessedFoodDatabase() {
       try {
-        const res = await fetch('indian_foods.json');
+        const res = await fetch('Indian_Food_Nutrition_Processed.csv');
         if (!res.ok) return;
-        const foodList = await res.json();
+        const csvText = await res.text();
 
+        const lines = csvText.trim().split(/\r?\n/);
         const existingNames = new Set(window.indianFoodDatabase.map(f => f.name.toLowerCase()));
         let added = 0;
 
-        foodList.forEach(item => {
-          if (!existingNames.has(item.name.toLowerCase())) {
-            window.indianFoodDatabase.push(item);
-            existingNames.add(item.name.toLowerCase());
-            added++;
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i];
+          if (!line) continue;
+
+          // Split line handling quotes
+          const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+          if (cols.length >= 5) {
+            const name = cols[0].replace(/^"|"$/g, '').trim();
+            const cal = Math.round(parseFloat(cols[1])) || 0;
+            const carb = parseFloat(parseFloat(cols[2] || 0).toFixed(1));
+            const pro = parseFloat(parseFloat(cols[3] || 0).toFixed(1));
+            const fat = parseFloat(parseFloat(cols[4] || 0).toFixed(1));
+
+            if (name && !existingNames.has(name.toLowerCase())) {
+              window.indianFoodDatabase.push({
+                id: 'ifct-' + i,
+                name: name,
+                portion: '100g',
+                calories: cal,
+                protein: pro,
+                carbs: carb,
+                fats: fat,
+                favorite: false
+              });
+              existingNames.add(name.toLowerCase());
+              added++;
+            }
           }
-        });
+        }
 
         if (added > 0) {
           renderFoodLibrary();
         }
       } catch (e) {
-        console.warn("External Indian foods database not found or offline:", e);
+        console.warn("Could not load Indian_Food_Nutrition_Processed.csv:", e);
       }
     }
 

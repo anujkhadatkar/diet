@@ -38,11 +38,67 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <style>
+ <style>
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(160, 160, 160, 0.25); border-radius: 9999px; }
     .badge-pill { font-size: 0.62rem; line-height: 0.8rem; }
+
+    /* --- LIGHT MODE DYNAMIC OVERRIDES --- */
+    html:not(.dark) body {
+      background-color: #f8fafc !important; /* Slate 50 */
+      color: #0f172a !important;            /* Slate 900 */
+    }
+    html:not(.dark) header {
+      background-color: rgba(255, 255, 255, 0.9) !important;
+      border-color: #e2e8f0 !important;
+    }
+    html:not(.dark) .bg-neutral-900,
+    html:not(.dark) .bg-neutral-900\/90,
+    html:not(.dark) .bg-neutral-900\/80,
+    html:not(.dark) .bg-neutral-900\/60,
+    html:not(.dark) .bg-neutral-900\/30 {
+      background-color: #f1f5f9 !important; /* Slate 100 */
+      border-color: #cbd5e1 !important;
+    }
+    html:not(.dark) .bg-neutral-800,
+    html:not(.dark) .bg-neutral-800\/90,
+    html:not(.dark) .bg-neutral-800\/80,
+    html:not(.dark) .bg-neutral-800\/60,
+    html:not(.dark) .bg-neutral-800\/50,
+    html:not(.dark) .bg-neutral-800\/40 {
+      background-color: #ffffff !important; /* Crisp white cards */
+      border-color: #e2e8f0 !important;
+    }
+    html:not(.dark) .bg-neutral-700,
+    html:not(.dark) .bg-neutral-700\/80 {
+      background-color: #e2e8f0 !important;
+      color: #1e293b !important;
+    }
+    html:not(.dark) .border-neutral-800,
+    html:not(.dark) .border-neutral-700,
+    html:not(.dark) .border-neutral-700\/60,
+    html:not(.dark) .border-neutral-700\/40 {
+      border-color: #e2e8f0 !important;
+    }
+    html:not(.dark) .text-white,
+    html:not(.dark) .text-neutral-100,
+    html:not(.dark) .text-neutral-200 {
+      color: #0f172a !important; /* Dark text for readability */
+    }
+    html:not(.dark) .text-neutral-300,
+    html:not(.dark) .text-neutral-400 {
+      color: #64748b !important; /* Muted slate text */
+    }
+    html:not(.dark) input,
+    html:not(.dark) select {
+      background-color: #f8fafc !important;
+      color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
+    html:not(.dark) #tab-diary .bg-gradient-to-r {
+      background: linear-color(to right, rgba(245, 158, 11, 0.08), transparent) !important;
+    }
   </style>
 </head>
 <body class="bg-neutral-900 text-neutral-100 min-h-screen font-sans selection:bg-amber-500/20 selection:text-amber-400 transition-colors duration-200 pb-20">
